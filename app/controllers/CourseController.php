@@ -58,72 +58,63 @@ class CourseController extends Controller
         $this->render('users/teacher/create_course', ['categories' => $categories, 'tags' => $tags]);
     }
 
-    public function store()
+    public function saveStep1()
     {
-        error_log("Starting course creation process");
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            error_log("POST data received: " . print_r($_POST, true));
-
-            // Prepare course data
-            $courseData = [
-                'titre' => htmlspecialchars(filter_input(INPUT_POST, 'titre', FILTER_DEFAULT) ?? ''),
-                'description' => htmlspecialchars(filter_input(INPUT_POST, 'description', FILTER_DEFAULT) ?? ''),
-                'categorie_id' => filter_input(INPUT_POST, 'categorie_id', FILTER_VALIDATE_INT),
-                'enseignant_id' => $_SESSION['user_id'],
+            $_SESSION['course_data'] = [
+                'titre' => $_POST['titre'],
+                'description' => $_POST['description'],
+                'categorie_id' => $_POST['categorie_id'],
+                'content_type' => $_POST['content_type'],
+                'tags' => $_POST['tags'] ?? []
             ];
 
-            // Log the course data for debugging
-            error_log("Processed course data: " . print_r($courseData, true));
+            $this->redirect('teacher/courses/content');
+        }
+    }
 
+    public function showContentForm()
+    {
+        if (!isset($_SESSION['course_data'])) {
+            $this->redirect('teacher/courses/create');
+        }
+
+        $this->render('users/teacher/course_content');
+    }
+
+    public function store()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                // Create course and get its ID
+                if (!isset($_SESSION['course_data'])) {
+                    throw new \Exception("Les données du cours sont manquantes.");
+                }
+
+                $courseData = array_merge($_SESSION['course_data'], [
+                    'enseignant_id' => $_SESSION['user_id'],
+                    'content' => $_POST['video_content'] ?? $_POST['document_content'] ?? null
+                ]);
+
                 $courseId = $this->courseModel->create($courseData);
 
-                // Handle tags
-                if (isset($_POST['tags']) && is_array($_POST['tags'])) {
-                    foreach ($_POST['tags'] as $tagId) {
+                if (!empty($courseData['tags'])) {
+                    foreach ($courseData['tags'] as $tagId) {
                         $this->courseModel->addTag($courseId, $tagId);
                     }
                 }
 
+                unset($_SESSION['course_data']);
                 $_SESSION['success'] = "Cours créé avec succès.";
             } catch (\Exception $e) {
-                error_log("Error creating course: " . $e->getMessage());
                 $_SESSION['error'] = "Erreur lors de la création du cours: " . $e->getMessage();
             }
 
             $this->redirect('dashboard');
-
-
-            // Create the course
-            $courseId = $this->courseModel->create($courseData);
-
-            // Check if the course was created successfully
-            if (!$courseId) {
-                $_SESSION['error'] = "Erreur lors de la création du cours.";
-                $this->redirect('teacher/courses/create');
-            }
-
-            $_SESSION['success'] = "Cours créé avec succès.";
-            $this->redirect('teacher/courses');
-
-            if (isset($_FILES['attachments']) && $_FILES['attachments']['error'][0] === UPLOAD_ERR_OK) {
-                foreach ($_FILES['attachments']['tmp_name'] as $key => $tmpName) {
-                    $fileName = $_FILES['attachments']['name'][$key];
-                    $filePath = BASE_PATH . '/public/uploads/' . basename($fileName);
-
-                    if (move_uploaded_file($tmpName, $filePath)) {
-                        $attachmentData = [
-                            'name' => $fileName,
-                            'path' => $filePath,
-                            'cours_id' => $courseId,
-                        ];
-                        $this->attachmentModel->create($attachmentData);
-                    }
-                }
-            }
         }
     }
+
+
+
 
     public function enroll($courseId)
     {

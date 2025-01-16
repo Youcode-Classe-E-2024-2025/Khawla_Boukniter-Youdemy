@@ -23,17 +23,18 @@
         </div>
 
         <div class="bg-white shadow rounded-lg">
-            <form action="<?= base_url('teacher/courses/store') ?>" method="POST" class="space-y-8 divide-y divide-gray-200 p-8">
+            <form action="<?= base_url('teacher/courses/save-step1') ?>" method="POST" class="space-y-8 p-8">
                 <?= csrf_field() ?>
 
                 <div class="space-y-8 divide-y ">
                     <div>
-                        <div>
-                            <h3 class="text-lg leading-6 font-medium text-gray-900">Informations de base</h3>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Ces informations seront affichées publiquement sur la page de votre cours.
-                            </p>
-                        </div>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Informations de base</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Ces informations seront affichées publiquement sur la page de votre cours.
+                        </p>
+                    </div>
+
+                    <div>
 
                         <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                             <div class="sm:col-span-4">
@@ -69,25 +70,25 @@
                             </div>
 
                             <div class="sm:col-span-6">
-                                <label for="content_type" class="block text-sm font-medium text-gray-700">
-                                    Type de contenu *
-                                </label>
-                                <div class="mt-1">
-                                    <select id="content_type"
-                                        name="content_type"
-                                        required
-                                        class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                                        <option value="">Sélectionnez un type de contenu</option>
-                                        <option value="video">Vidéo</option>
-                                        <option value="document">Document</option>
-                                    </select>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <label for="content_url" class="block text-sm font-medium text-gray-700">
-                                        URL du contenu *
+                                <div class="flex items-center">
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Type de contenu *
                                     </label>
-                                    <div class="mt-1">
-                                        <input type="text" name="content_url" id="content_url" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" required>
+                                    <div class="ml-8 flex space-x-12">
+                                        <div class="flex items-center">
+                                            <input type="radio" id="video" name="content_type" value="video" required
+                                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <label for="video" class="ml-3 block text-sm font-medium text-gray-700">
+                                                Vidéo
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <input type="radio" id="document" name="content_type" value="document" required
+                                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                            <label for="document" class="ml-3 block text-sm font-medium text-gray-700">
+                                                Document
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -162,31 +163,6 @@
 
                         </div>
                     </div>
-
-                    <div class="pt-8">
-                        <div class="sm:col-span-6">
-                            <label class="block text-sm font-medium text-gray-700">
-                                Vidéo de présentation
-                            </label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                                <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="preview_video" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
-                                            <span>Télécharger une vidéo</span>
-                                            <input id="preview_video" name="preview_video" type="file" class="sr-only" accept="video/*">
-                                        </label>
-                                    </div>
-                                    <p class="text-xs text-gray-500">
-                                        MP4 jusqu'à 100MB
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
 
                 </div>
 
