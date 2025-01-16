@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Youdemy - Plateforme de cours en ligne</title>
+    <title>EduFun - Plateforme de cours en ligne</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="<?= asset_url('css/style.css') ?>" rel="stylesheet">
     <?php if (isset($isHomePage) && $isHomePage): ?>
@@ -72,6 +72,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 <?= htmlspecialchars($_SESSION['error']) ?>
+                <?php unset($_SESSION['error']); ?>
             </div>
         </div>
     <?php endif; ?>
@@ -80,6 +81,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                 <?= htmlspecialchars($_SESSION['success']) ?>
+                <?php unset($_SESSION['success']); ?>
             </div>
         </div>
     <?php endif; ?>
@@ -89,7 +91,7 @@
         <?php if (isset($content)) echo $content; ?>
     </main>
 
-    <footer class="footer mt-auto py-3">
+    <!-- <footer class="footer mt-auto py-3">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
@@ -144,10 +146,9 @@
                 </div>
             </div>
         </div>
-    </footer>
+    </footer> -->
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= asset_url('js/main.js') ?>"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     </body>
 
 </html>

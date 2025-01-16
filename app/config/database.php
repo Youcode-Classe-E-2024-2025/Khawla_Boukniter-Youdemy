@@ -5,9 +5,8 @@ use PDO;
 use PDOException;
 use InvalidArgumentException;
 use Exception;
-use App\Exceptions\DbException;
 
-class DatabaseConfig {
+class Database {
     private const HOST = 'localhost';
     private const USERNAME = 'root';
     private const PASSWORD = '';
@@ -32,7 +31,7 @@ class DatabaseConfig {
                 self::$instance->exec('SET NAMES utf8mb4');
             } catch (PDOException $e) {
                 error_log("Erreur de connexion à la base de données : " . $e->getMessage());
-                throw new DbException("Impossible de se connecter à la base de données.");
+                throw new Exception("Impossible de se connecter à la base de données.");
             }
         }
 
@@ -62,7 +61,7 @@ class DatabaseConfig {
             return $stmt->fetchColumn() > 0;
         } catch (PDOException $e) {
             error_log("Erreur lors de la vérification du role : " . $e->getMessage());
-            throw new DbException("Erreur lors de la vérification du role.");
+            throw new Exception("Erreur lors de la vérification du role.");
         }
     }
 
@@ -79,7 +78,7 @@ class DatabaseConfig {
             return $role !== false ? (int)$role : null;
         } catch (PDOException $e) {
             error_log("Erreur lors de la récupération du rôle : " . $e->getMessage());
-            throw new DbException("Erreur lors de la récupération du rôle.");
+            throw new Exception("Erreur lors de la récupération du rôle.");
         }
     }
 }
