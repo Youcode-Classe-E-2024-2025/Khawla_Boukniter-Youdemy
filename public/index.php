@@ -35,13 +35,13 @@ $router->addRoute('GET', '/choose_role', [AuthController::class, 'chooseRoleForm
 $router->addRoute('POST', '/choose_role', [AuthController::class, 'chooseRole']);
 $router->addRoute('GET', '/logout', [AuthController::class, 'logout']);
 
-$router->addRoute('GET','/dashboard', [DashboardController::class,'index']);
+$router->addRoute('GET', '/dashboard', [DashboardController::class, 'index']);
 
-$router->addRoute('GET','/teacher/courses/create', [CourseController::class,'create']);
-$router->addRoute('POST','/teacher/courses/create', [CourseController::class,'store']);
+$router->addRoute('GET', '/teacher/courses/create', [CourseController::class, 'create']);
+$router->addRoute('POST', '/teacher/courses/store', [CourseController::class, 'store']);
 $router->addRoute('POST', '/teacher/courses', [CourseController::class, 'index']);
 
-$router->addRoute('GET','', [CourseController::class,'browse']);
+$router->addRoute('GET', '', [CourseController::class, 'browse']);
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = str_replace('/Khawla_Boukniter-Youdemy/public', '', $uri);

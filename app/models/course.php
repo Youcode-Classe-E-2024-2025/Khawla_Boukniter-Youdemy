@@ -4,29 +4,56 @@ namespace App\Models;
 
 use App\Core\Model;
 
-class Course extends Model {
+class Course extends Model
+{
     protected $table = 'cours';
     protected $fillable = [
-        'titre', 'description', 'categorie_id', 'enseignant_id',
+        'titre',
+        'description',
+        'categorie_id',
+        'enseignant_id',
     ];
 
-    public function create($data) {
-        // if (!isset($data['slug'])) {
-        //     $data['slug'] = $this->generateSlug($data['title']);
-        // }
-        return parent::create($data);
+    public function create($data)
+    {
+        error_log("Creating course with data: " . print_r($data, true));
+
+        $sql = "INSERT INTO cours (titre, description, categorie_id, enseignant_id) VALUES (:titre, :description, :categorie_id, :enseignant_id)";
+
+        try {
+            $stmt = $this->db->prepare($sql);
+            $resultat = $stmt->execute([
+                'titre' => $data['titre'],
+                'description' => $data['description'],
+                'categorie_id' => $data['categorie_id'],
+                'enseignant_id' => $data['enseignant_id'],
+            ]);
+
+            if ($resultat) {
+                return $this->db->lastInsertId();
+            }
+
+            error_log("Database error: " . print_r($stmt->errorInfo(), true));
+
+            return false;
+        } catch (\PDOException $e) {
+            error_log("Database error: " . $e->getMessage());
+            throw $e;
+        }
     }
 
-    public function update($id, $data) {
+    public function update($id, $data)
+    {
         // if (isset($data['title']) && !isset($data['slug'])) {
         //     $data['slug'] = $this->generateSlug($data['title']);
         // }
         return parent::update($id, $data);
     }
 
-    public function getPublishedCourses($filters = [], $page = 1, $limit = 12) {
+    public function getPublishedCourses($filters = [], $page = 1, $limit = 12)
+    {
         $offset = ($page - 1) * $limit;
-    
+
         $query = "SELECT 
                     c.*,
                     u.prenom as teacher_prenom,
@@ -37,28 +64,29 @@ class Course extends Model {
                   JOIN users u ON c.enseignant_id = u.id
                   JOIN categories cat ON c.categorie_id = cat.id
                   LEFT JOIN inscriptions e ON c.id = e.cours_id";
-    
+
         if (isset($filters['enseignant_id'])) {
             $query .= " WHERE c.enseignant_id = :enseignant_id";
         }
-    
+
         $query .= " GROUP BY c.id
                     ORDER BY c.created_at DESC
                     LIMIT :limit OFFSET :offset";
-    
+
         $stmt = $this->db->prepare($query);
-    
+
         if (isset($filters['enseignant_id'])) {
             $stmt->bindValue(':enseignant_id', $filters['enseignant_id'], \PDO::PARAM_INT);
         }
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-    
+
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public function search($keyword) {
+    public function search($keyword)
+    {
         $query = "SELECT 
                     c.*,
                     u.prenom as teacher_prenom,
@@ -81,7 +109,8 @@ class Course extends Model {
         return $stmt->fetchAll();
     }
 
-    public function getWithDetails($id) {
+    public function getWithDetails($id)
+    {
         $query = "SELECT 
                     c.*,
                     u.prenom as teacher_prenom,
@@ -104,13 +133,15 @@ class Course extends Model {
         return $stmt->fetch();
     }
 
-    public function getTags() {
+    public function getTags()
+    {
         $stmt = $this->db->prepare("SELECT * FROM tags");
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public function getCourseTags($courseId) {
+    public function getCourseTags($courseId)
+    {
         $query = "SELECT t.* 
                  FROM tags t
                  JOIN cours_tags ct ON t.id = ct.tag_id
@@ -121,7 +152,8 @@ class Course extends Model {
         return $stmt->fetchAll();
     }
 
-    public function addTag($courseId, $tagId) {
+    public function addTag($courseId, $tagId)
+    {
         $query = "INSERT IGNORE INTO cours_tags (cours_id, tag_id) 
                  VALUES (:cours_id, :tag_id)";
 
@@ -132,13 +164,15 @@ class Course extends Model {
         ]);
     }
 
-    public function removeTags($courseId) {
+    public function removeTags($courseId)
+    {
         $query = "DELETE FROM cours_tags WHERE cours_id = :cours_id";
         $stmt = $this->db->prepare($query);
         return $stmt->execute(['cours_id' => $courseId]);
     }
 
-    public function getTopCourses($limit = 5) {
+    public function getTopCourses($limit = 5)
+    {
         $query = "SELECT 
                     c.*,
                     u.prenom as teacher_prenom,
@@ -160,13 +194,15 @@ class Course extends Model {
         return $stmt->fetchAll();
     }
 
-    public function getTotalCourses() {
+    public function getTotalCourses()
+    {
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table} WHERE enseignant_id = :teacherId");
         $stmt->execute(['teacherId' => $_SESSION['user_id']]);
         return $stmt->fetchColumn();
     }
 
-    public function getTotalStudentsByTeacher($teacherId) {
+    public function getTotalStudentsByTeacher($teacherId)
+    {
         $stmt = $this->db->prepare("
             SELECT COUNT(DISTINCT e.user_id) 
             FROM inscriptions e 
@@ -177,13 +213,15 @@ class Course extends Model {
         return $stmt->fetchColumn();
     }
 
-    public function getTotalCoursesByTeacher($teacherId) {
+    public function getTotalCoursesByTeacher($teacherId)
+    {
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table} WHERE enseignant_id = :teacherId");
         $stmt->execute(['teacherId' => $teacherId]);
         return $stmt->fetchColumn();
     }
 
-    public function getCategories() {
+    public function getCategories()
+    {
         $stmt = $this->db->prepare("SELECT * FROM categories");
         $stmt->execute();
         return $stmt->fetchAll();
