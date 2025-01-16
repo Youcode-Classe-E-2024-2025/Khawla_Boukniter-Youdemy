@@ -33,15 +33,17 @@
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                         <p class="mt-2 text-sm text-gray-500">Format MP4 uniquement. Taille maximale: 100MB</p>
                     </div>
-                <?php else: ?>
+                <?php elseif ($_SESSION['course_data']['content_type'] === 'document'): ?>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2" for="document_content">
                             Contenu du document
                         </label>
-                        <textarea name="document_content"
-                            rows="10"
+                        <textarea id="document_content"
+                            name="document_content"
                             required
-                            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                            tabindex="0"
+                            aria-required="true"
+                            class="block w-full"></textarea>
                     </div>
                 <?php endif; ?>
 

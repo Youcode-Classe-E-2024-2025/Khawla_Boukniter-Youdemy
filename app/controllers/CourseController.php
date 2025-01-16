@@ -91,6 +91,15 @@ class CourseController extends Controller
                     'enseignant_id' => $_SESSION['user_id'],
                 ]);
 
+                if (
+                    empty($courseData['tags']) || empty($courseData['description']) ||
+                    empty($courseData['titre']) || empty($courseData['categorie_id']) ||
+                    empty($courseData['content_type'])
+                ) {
+                    $_SESSION['error'] = "Veuillez remplir tous les champs.";
+                    $this->redirect('teacher/courses/create');
+                    return;
+                }
                 $courseId = $this->courseModel->create($courseData);
 
                 if ($courseData['content_type'] === 'video' && isset($_FILES['video_content'])) {
@@ -111,6 +120,22 @@ class CourseController extends Controller
                         ];
                         $result = $this->attachmentModel->create($attachmentData);
                     }
+                } else if ($courseData['content_type'] === 'document' && isset($_POST['document_content'])) {
+                    $fileName = 'document_' . time() . '.md';
+                    $filePath = PUBLIC_PATH . '/uploads/documents/' . $fileName;
+
+                    if (!is_dir(PUBLIC_PATH . '/uploads/documents/')) {
+                        mkdir(PUBLIC_PATH . '/uploads/documents/', 0777, true);
+                    }
+
+                    file_put_contents($filePath, $_POST['document_content']);
+
+                    $attachmentData = [
+                        'name' => $fileName,
+                        'path' => $filePath,
+                        'cours_id' => $courseId
+                    ];
+                    $this->attachmentModel->create($attachmentData);
                 }
 
                 if (!empty($courseData['tags'])) {

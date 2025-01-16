@@ -2,16 +2,32 @@
 <html lang="fr">
 
 <head>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduFun - Plateforme de cours en ligne</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="<?= asset_url('css/style.css') ?>" rel="stylesheet">
-    <?php if (isset($isHomePage) && $isHomePage): ?>
-        <link href="<?= asset_url('css/home.css') ?>" rel="stylesheet">
-    <?php endif; ?>
-</head>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EduFun - Plateforme de cours en ligne</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="<?= asset_url('css/style.css') ?>" rel="stylesheet">
+        <?php if (isset($isHomePage) && $isHomePage): ?>
+            <link href="<?= asset_url('css/home.css') ?>" rel="stylesheet">
+        <?php endif; ?>
+        <script src="https://cdn.tiny.cloud/1/ffjb0gppot6y2dmxj12rgbip06mamy2rzh7ptmck77bsmo1h/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+        <script>
+            tinymce.init({
+                selector: '#document_content',
+                plugins: 'markdown anchor autolink charmap codesample emoticons link lists media searchreplace table visualblocks wordcount',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                height: 500,
+                markdown: true,
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        </script>
+    </head>
 
 <body>
     <!-- Navigation -->
@@ -149,7 +165,6 @@
     </footer> -->
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
-    </body>
+</body>
 
 </html>
-
