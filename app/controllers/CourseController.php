@@ -86,16 +86,32 @@ class CourseController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                if (!isset($_SESSION['course_data'])) {
-                    throw new \Exception("Les données du cours sont manquantes.");
-                }
 
                 $courseData = array_merge($_SESSION['course_data'], [
                     'enseignant_id' => $_SESSION['user_id'],
-                    'content' => $_POST['video_content'] ?? $_POST['document_content'] ?? null
                 ]);
 
                 $courseId = $this->courseModel->create($courseData);
+
+                if ($courseData['content_type'] === 'video' && isset($_FILES['video_content'])) {
+                    $file = $_FILES['video_content'];
+
+                    $fileName = time() . '_' . $file['name'];
+                    $uploadPath = PUBLIC_PATH . '/uploads/videos/' . $fileName;
+
+                    if (!is_dir(PUBLIC_PATH . '/uploads/videos/')) {
+                        mkdir(PUBLIC_PATH . '/uploads/videos/', 0777, true);
+                    }
+
+                    if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
+                        $attachmentData = [
+                            'name' => $file['name'],
+                            'path' => $uploadPath,
+                            'cours_id' => $courseId
+                        ];
+                        $result = $this->attachmentModel->create($attachmentData);
+                    }
+                }
 
                 if (!empty($courseData['tags'])) {
                     foreach ($courseData['tags'] as $tagId) {

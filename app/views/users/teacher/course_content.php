@@ -20,7 +20,7 @@
         </div>
 
         <div class="bg-white shadow rounded-lg">
-            <form action="<?= base_url('teacher/courses/store') ?>" method="POST" class="space-y-8 p-8">
+            <form action="<?= base_url('teacher/courses/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-8 p-8">
                 <?php if ($_SESSION['course_data']['content_type'] === 'video'): ?>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -31,6 +31,7 @@
                             accept="video/*"
                             required
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        <p class="mt-2 text-sm text-gray-500">Format MP4 uniquement. Taille maximale: 100MB</p>
                     </div>
                 <?php else: ?>
                     <div>
