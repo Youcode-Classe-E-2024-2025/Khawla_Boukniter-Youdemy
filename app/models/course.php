@@ -116,24 +116,20 @@ class Course extends Model
     {
         $query = "SELECT 
                     c.*,
-                    u.prenom as teacher_prenom,
-                    u.nom as teacher_nom,
-                    -- u.avatar_url as teacher_avatar,
+                    c.titre as course_title,
+                    c.description as course_description,
+                    c.content_type,
                     cat.name as category_name,
-                    COUNT(DISTINCT e.user_id) as student_count,
-                    -- AVG(r.rating) as average_rating,
-                    -- COUNT(DISTINCT r.id) as rating_count
-                 FROM {$this->table} c
-                 JOIN users u ON c.enseignant_id = u.id
-                 JOIN categories cat ON c.categorie_id = cat.id
+                    COUNT(DISTINCT e.user_id) as student_count
+                 FROM cours c
+                 LEFT JOIN categories cat ON c.categorie_id = cat.id
                  LEFT JOIN inscriptions e ON c.id = e.cours_id
-                --  LEFT JOIN course_ratings r ON c.id = r.course_id
                  WHERE c.id = :id
-                 GROUP BY c.id";
+                 GROUP BY c.id, c.titre, c.description, c.content_type, cat.name";
 
         $stmt = $this->db->prepare($query);
         $stmt->execute(['id' => $id]);
-        return $stmt->fetch();
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function getTags()
@@ -227,6 +223,18 @@ class Course extends Model
     {
         $stmt = $this->db->prepare("SELECT * FROM categories");
         $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getCourseCategory($courseId)
+    {
+        $query = "SELECT c.* 
+                 FROM cours c
+                 JOIN categories cat ON c.categorie_id = cat.id
+                 WHERE c.id = :cours_id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['cours_id' => $courseId]);
         return $stmt->fetchAll();
     }
 }

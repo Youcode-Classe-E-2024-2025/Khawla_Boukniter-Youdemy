@@ -88,10 +88,10 @@
                                 ?>
                             </div>
                             <div class="mt-4 flex space-x-3">
-                                <a href="/teacher/courses/edit/<?= $course['id'] ?>" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                <a href="<?= base_url('teacher/edit_course/' . $course['id']) ?>" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                     Modifier
                                 </a>
-                                <form action="/teacher/courses/delete/<?= $course['id'] ?>" method="POST" class="inline">
+                                <form action="<?= base_url('teacher/delete_course/' . $course['id']) ?>" method="POST" class="inline">
                                     <button type="submit" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce cours ?')"
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700">
                                         Supprimer

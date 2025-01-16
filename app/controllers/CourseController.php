@@ -154,8 +154,60 @@ class CourseController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        error_log("Editing course with ID: " . $id);
 
+        $course = $this->courseModel->getWithDetails($id);
+        error_log("Course data: " . print_r($course, true));
 
+        if (!$course) {
+            error_log("Course not found in database");
+        }
+
+        $categories = $this->courseModel->getCategories();
+        $tags = $this->courseModel->getTags();
+        $courseTags = $this->courseModel->getCourseTags($id);
+
+        $this->render('users/teacher/edit_course', [
+            'course' => $course,
+            'categories' => $categories,
+            'tags' => $tags,
+            'courseTags' => $courseTags
+        ]);
+    }
+
+    public function update($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $courseData = [
+                'titre' => $_POST['titre'],
+                'description' => $_POST['description'],
+                'categorie_id' => $_POST['categorie_id'],
+                'content_type' => $_POST['content_type']
+            ];
+
+            $this->courseModel->update($id, $courseData);
+
+            if (!empty($_POST['tags'])) {
+                $this->courseModel->removeTags($id);
+                foreach ($_POST['tags'] as $tagId) {
+                    $this->courseModel->addTag($id, $tagId);
+                }
+            }
+
+            $_SESSION['success'] = "Cours mis à jour avec succès.";
+            $this->redirect('dashboard');
+        }
+    }
+
+    public function delete($id)
+    {
+        $this->courseModel->removeTags($id);
+        $this->courseModel->delete($id);
+        $_SESSION['success'] = "Cours supprimé avec succès.";
+        $this->redirect('dashboard');
+    }
 
     public function enroll($courseId)
     {
