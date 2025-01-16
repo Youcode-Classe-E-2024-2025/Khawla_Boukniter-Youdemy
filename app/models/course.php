@@ -59,11 +59,14 @@ class Course extends Model
                     u.prenom as teacher_prenom,
                     u.nom as teacher_nom,
                     cat.name as category_name,
-                    COUNT(DISTINCT e.user_id) as student_count
+                    COUNT(DISTINCT e.user_id) as student_count,
+                    GROUP_CONCAT(t.name) as tag_names
                   FROM {$this->table} c
                   JOIN users u ON c.enseignant_id = u.id
                   JOIN categories cat ON c.categorie_id = cat.id
-                  LEFT JOIN inscriptions e ON c.id = e.cours_id";
+                  LEFT JOIN inscriptions e ON c.id = e.cours_id
+                  LEFT JOIN cours_tags ct ON c.id = ct.cours_id
+                  LEFT JOIN tags t ON t.id = ct.tag_id";
 
         if (isset($filters['enseignant_id'])) {
             $query .= " WHERE c.enseignant_id = :enseignant_id";

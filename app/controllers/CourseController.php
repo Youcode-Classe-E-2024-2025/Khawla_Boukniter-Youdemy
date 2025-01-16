@@ -76,8 +76,16 @@ class CourseController extends Controller
             error_log("Processed course data: " . print_r($courseData, true));
 
             try {
+                // Create course and get its ID
                 $courseId = $this->courseModel->create($courseData);
-                error_log("Course created with ID: " . $courseId);
+
+                // Handle tags
+                if (isset($_POST['tags']) && is_array($_POST['tags'])) {
+                    foreach ($_POST['tags'] as $tagId) {
+                        $this->courseModel->addTag($courseId, $tagId);
+                    }
+                }
+
                 $_SESSION['success'] = "Cours créé avec succès.";
             } catch (\Exception $e) {
                 error_log("Error creating course: " . $e->getMessage());
