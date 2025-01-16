@@ -1,0 +1,26 @@
+/vendor/
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+*.log
+.idea/
+.vscode/
+composer.lock
+composer.json
+# Ignore the database configuration file
+app/config/database.php
+# Ignore compiled files
+*.o
+*.so
+*.dll
+# Ignore temporary files
+*.tmp
+# Ignore IDE files
+*.sublime-workspace
+*.sublime-project
+# Ignore node_modules directory
+/node_modules/
