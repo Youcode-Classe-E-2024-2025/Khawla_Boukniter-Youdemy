@@ -39,7 +39,7 @@ class CourseController extends Controller
         if (!$course) {
             $this->redirect('courses');
         }
-        $categorie = $this->courseModel->getCategorie();
+        $categorie = $this->courseModel->getCourseCategory($id);
         $tags = $this->courseModel->getCourseTags($id);
 
         $this->render('courses/show', ['course' => $course, 'categorie' => $categorie, 'tags' => $tags]);
@@ -209,6 +209,17 @@ class CourseController extends Controller
         $this->redirect('dashboard');
     }
 
+    public function viewEnrollments($courseId)
+    {
+        $course = $this->courseModel->getWithDetails($courseId);
+        $enrollments = $this->courseModel->getEnrollments($courseId);
+
+        $this->render('users/teacher/course_enrollments', [
+            'course' => $course,
+            'enrollments' => $enrollments
+        ]);
+    }
+
     public function enroll($courseId)
     {
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 1) {
@@ -219,5 +230,17 @@ class CourseController extends Controller
         $this->courseModel->enroll($_SESSION['user_id'], $courseId);
         $_SESSION['success'] = "Vous êtes maintenant inscrit au cours.";
         $this->redirect("courses/$courseId");
+    }
+
+    public function teacherCourses()
+    {
+        $courses = $this->courseModel->getTeacherCourses($_SESSION['user_id']);
+
+        foreach ($courses as &$course) {
+            $course['category'] = $this->courseModel->getCourseCategory($course['id']);
+            $course['tags'] = $this->courseModel->getCourseTags($course['id']);
+        }
+
+        $this->render('users/teacher/courses', ['courses' => $courses]);
     }
 }

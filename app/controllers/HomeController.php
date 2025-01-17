@@ -3,24 +3,27 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use Models\Course;
+use App\Models\Course;
 
-class HomeController extends Controller {
+class HomeController extends Controller
+{
     private Course $courseModel;
 
-    public function __construct() {
-        // try {
-        //     $this->courseModel = new Course();
-        // } catch (\Exception $e) {
-        //     error_log("Erreur de connexion à la base de données : " . $e->getMessage());
-        // }
+    public function __construct()
+    {
+        try {
+            $this->courseModel = new Course();
+        } catch (\Exception $e) {
+            error_log("Erreur de connexion à la base de données : " . $e->getMessage());
+        }
     }
 
-    public function index() {
+    public function index()
+    {
         try {
             // Récupérer les projets publics
             // $Courses = $this->courseModel->findAll(['is_active' => '1']);
-            
+
             // Calculer quelques statistiques
             // $stats = [
             //     'total_courses' => count($publicCourses),
@@ -37,8 +40,7 @@ class HomeController extends Controller {
                 // 'stats' => $stats,
                 'pageTitle' => 'Accueil'
             ]);
-        } 
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             error_log("Erreur lors du chargement de la page d'accueil : " . $e->getMessage());
             $_SESSION['error'] = "Une erreur est survenue lors du chargement de la page.";
             // $this->render('home/index', [

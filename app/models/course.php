@@ -44,9 +44,6 @@ class Course extends Model
 
     public function update($id, $data)
     {
-        // if (isset($data['title']) && !isset($data['slug'])) {
-        //     $data['slug'] = $this->generateSlug($data['title']);
-        // }
         return parent::update($id, $data);
     }
 
@@ -87,6 +84,31 @@ class Course extends Model
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    public function getTeacherCoursesWithDetails($teacherId)
+    {
+        $query = "SELECT 
+                    c.*,
+                    cat.name as category_name,
+                    COUNT(DISTINCT i.user_id) as student_count
+                  FROM cours c
+                  LEFT JOIN categories cat ON c.categorie_id = cat.id
+                  LEFT JOIN inscriptions i ON c.id = i.cours_id
+                  WHERE c.enseignant_id = :teacher_id
+                  GROUP BY c.id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['teacher_id' => $teacherId]);
+        $courses = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Add tags for each course
+        foreach ($courses as &$course) {
+            $course['tags'] = $this->getCourseTags($course['id']);
+        }
+
+        return $courses;
+    }
+
 
     public function search($keyword)
     {
@@ -236,5 +258,36 @@ class Course extends Model
         $stmt = $this->db->prepare($query);
         $stmt->execute(['cours_id' => $courseId]);
         return $stmt->fetchAll();
+    }
+
+    public function getEnrollments($courseId)
+    {
+        $query = "SELECT
+        u.id, u.nom, u.prenom, u.email, i.inscription_date
+        FROM inscriptions i
+        JOIN users u ON i.user_id = u.id
+        WHERE i.cours_id = :courseId
+        ORDER BY i.inscription_date DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['courseId' => $courseId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getTeacherCourses($teacherId)
+    {
+        $query = "SELECT 
+                      c.*, 
+                      cat.name as category_name,
+                      COUNT(DISTINCT e.user_id) as student_count
+                    FROM cours c
+                    LEFT JOIN categories cat ON c.categorie_id = cat.id
+                    LEFT JOIN inscriptions e ON c.id = e.cours_id
+                    WHERE c.enseignant_id = :teacher_id
+                    GROUP BY c.id, cat.name";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['teacher_id' => $teacherId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

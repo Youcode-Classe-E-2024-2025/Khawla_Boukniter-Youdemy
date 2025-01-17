@@ -44,6 +44,8 @@ $router->addRoute('POST', '/teacher/courses/store', [CourseController::class, 's
 $router->addRoute('GET', '/teacher/edit_course/{id}', [CourseController::class, 'edit']);
 $router->addRoute('POST', '/teacher/edit_course/{id}', [CourseController::class, 'update']);
 $router->addRoute('POST', '/teacher/delete_course/{id}', [CourseController::class, 'delete']);
+$router->addRoute('GET', '/teacher/courses/{id}/enrollments', [CourseController::class, 'viewEnrollments']);
+$router->addRoute('GET', '/users/teacher/courses', [CourseController::class, 'teacherCourses']);
 $router->addRoute('POST', '/teacher/courses', [CourseController::class, 'index']);
 
 $router->addRoute('GET', '', [CourseController::class, 'browse']);
