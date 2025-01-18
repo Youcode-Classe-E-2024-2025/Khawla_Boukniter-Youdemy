@@ -35,7 +35,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
-                    <a href="/" class="flex items-center text-xl font-bold text-indigo-600">
+                    <a href="<?= isset($_SESSION['user_id']) ? base_url('dashboard') : base_url('/') ?>" class="flex items-center text-xl font-bold text-indigo-600">
                         Youdemy
                     </a>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">

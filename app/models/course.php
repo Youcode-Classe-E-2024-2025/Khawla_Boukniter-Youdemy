@@ -200,25 +200,23 @@ class Course extends Model
     public function getTopCourses($limit = 5)
     {
         $query = "SELECT 
-                    c.*,
-                    u.prenom as teacher_prenom,
-                    u.nom as teacher_nom,
-                    COUNT(DISTINCT e.user_id) as student_count,
-                    -- AVG(r.rating) as average_rating
-                 FROM {$this->table} c
-                 JOIN users u ON c.enseignant_id = u.id
-                 LEFT JOIN inscriptions e ON c.id = e.cours_id
-                --  LEFT JOIN course_ratings r ON c.id = r.course_id
-                --  WHERE c.status = 'published'
-                 GROUP BY c.id
-                 ORDER BY student_count DESC
-                 LIMIT :limit";
+                c.*,
+                u.prenom as teacher_prenom,
+                u.nom as teacher_nom,
+                COUNT(DISTINCT e.user_id) as student_count
+             FROM cours c
+             JOIN users u ON c.enseignant_id = u.id
+             LEFT JOIN inscriptions e ON c.id = e.cours_id
+             GROUP BY c.id, u.prenom, u.nom
+             ORDER BY student_count DESC
+             LIMIT :limit";
 
         $stmt = $this->db->prepare($query);
         $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
 
     public function getTotalCourses()
     {
