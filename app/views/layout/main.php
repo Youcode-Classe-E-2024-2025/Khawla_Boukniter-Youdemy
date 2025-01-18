@@ -45,8 +45,8 @@
                                 <a href="<?= base_url('users/teacher/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
                                     Mes cours
                                 </a>
-                                <a href="<?= base_url('users/teacher/stats') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
-                                    Statistiques
+                                <a href="<?= base_url('dashboard') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Dashboard
                                 </a>
                             <?php elseif ($_SESSION['user_role'] === 1): ?>
                                 <a href="<?= base_url('users/student/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">

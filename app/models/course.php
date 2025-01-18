@@ -290,4 +290,25 @@ class Course extends Model
         $stmt->execute(['teacher_id' => $teacherId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    public function getLatestTeacherCourses($teacherId, $limit = 3)
+    {
+        $query = "SELECT 
+                    c.*, 
+                    cat.name as category_name,
+                    COUNT(DISTINCT e.user_id) as student_count
+                  FROM cours c
+                  LEFT JOIN categories cat ON c.categorie_id = cat.id
+                  LEFT JOIN inscriptions e ON c.id = e.cours_id
+                  WHERE c.enseignant_id = :teacher_id
+                  GROUP BY c.id, cat.name
+                  ORDER BY c.created_at DESC
+                  LIMIT :limit";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(':teacher_id', $teacherId, \PDO::PARAM_INT);
+        $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

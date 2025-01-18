@@ -37,9 +37,11 @@ $router->addRoute('GET', '/logout', [AuthController::class, 'logout']);
 
 $router->addRoute('GET', '/dashboard', [DashboardController::class, 'index']);
 
+// $router->addRoute('GET', '/courses', [DashboardController::class, 'index']);
+
 $router->addRoute('GET', '/teacher/courses/create', [CourseController::class, 'create']);
 $router->addRoute('GET', '/teacher/courses/content', [CourseController::class, 'showContentForm']);
-$router->addRoute('POST', '/teacher/courses/save-step1', [CourseController::class, 'saveStep1']);
+$router->addRoute('POST', '/teacher/courses/save_step1', [CourseController::class, 'saveStep1']);
 $router->addRoute('POST', '/teacher/courses/store', [CourseController::class, 'store']);
 $router->addRoute('GET', '/teacher/edit_course/{id}', [CourseController::class, 'edit']);
 $router->addRoute('POST', '/teacher/edit_course/{id}', [CourseController::class, 'update']);

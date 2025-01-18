@@ -61,6 +61,32 @@ class CourseController extends Controller
     public function saveStep1()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $errors = [];
+
+            if (empty($_POST['titre'])) {
+                $errors[] = "Le titre du cours est requis";
+            }
+            if (empty($_POST['description'])) {
+                $errors[] = "La description du cours est requise";
+            }
+            if (empty($_POST['categorie_id'])) {
+                $errors[] = "La catégorie est requise";
+            }
+            if (empty($_POST['tags'])) {
+                $errors[] = "Sélectionnez au moins un tag";
+            }
+            if (empty($_POST['content_type'])) {
+                $errors[] = "Le type de contenu est requis";
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['errors'] = $errors;
+                $this->redirect('teacher/courses/create');
+                return;
+            }
+
+
             $_SESSION['course_data'] = [
                 'titre' => $_POST['titre'],
                 'description' => $_POST['description'],
@@ -85,71 +111,18 @@ class CourseController extends Controller
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            try {
 
-                $courseData = array_merge($_SESSION['course_data'], [
-                    'enseignant_id' => $_SESSION['user_id'],
-                ]);
+            $courseData = [
+                'titre' => $_POST['titre'],
+                'description' => $_POST['description'],
+                'categorie_id' => $_POST['categorie_id'],
+                'enseignant_id' => $_SESSION['user_id'],
+                'content_type' => $_POST['content_type'],
+                'tags' => $_POST['tags'] ?? []
+            ];
 
-                if (
-                    empty($courseData['tags']) || empty($courseData['description']) ||
-                    empty($courseData['titre']) || empty($courseData['categorie_id']) ||
-                    empty($courseData['content_type'])
-                ) {
-                    $_SESSION['error'] = "Veuillez remplir tous les champs.";
-                    $this->redirect('teacher/courses/create');
-                    return;
-                }
-                $courseId = $this->courseModel->create($courseData);
-
-                if ($courseData['content_type'] === 'video' && isset($_FILES['video_content'])) {
-                    $file = $_FILES['video_content'];
-
-                    $fileName = time() . '_' . $file['name'];
-                    $uploadPath = PUBLIC_PATH . '/uploads/videos/' . $fileName;
-
-                    if (!is_dir(PUBLIC_PATH . '/uploads/videos/')) {
-                        mkdir(PUBLIC_PATH . '/uploads/videos/', 0777, true);
-                    }
-
-                    if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-                        $attachmentData = [
-                            'name' => $file['name'],
-                            'path' => $uploadPath,
-                            'cours_id' => $courseId
-                        ];
-                        $result = $this->attachmentModel->create($attachmentData);
-                    }
-                } else if ($courseData['content_type'] === 'document' && isset($_POST['document_content'])) {
-                    $fileName = 'document_' . time() . '.md';
-                    $filePath = PUBLIC_PATH . '/uploads/documents/' . $fileName;
-
-                    if (!is_dir(PUBLIC_PATH . '/uploads/documents/')) {
-                        mkdir(PUBLIC_PATH . '/uploads/documents/', 0777, true);
-                    }
-
-                    file_put_contents($filePath, $_POST['document_content']);
-
-                    $attachmentData = [
-                        'name' => $fileName,
-                        'path' => $filePath,
-                        'cours_id' => $courseId
-                    ];
-                    $this->attachmentModel->create($attachmentData);
-                }
-
-                if (!empty($courseData['tags'])) {
-                    foreach ($courseData['tags'] as $tagId) {
-                        $this->courseModel->addTag($courseId, $tagId);
-                    }
-                }
-
-                unset($_SESSION['course_data']);
-                $_SESSION['success'] = "Cours créé avec succès.";
-            } catch (\Exception $e) {
-                $_SESSION['error'] = "Erreur lors de la création du cours: " . $e->getMessage();
-            }
-
+            $courseId = $this->courseModel->create($courseData);
+            $_SESSION['success'] = "Cours créé avec succès.";
             $this->redirect('dashboard');
         }
     }
@@ -242,5 +215,19 @@ class CourseController extends Controller
         }
 
         $this->render('users/teacher/courses', ['courses' => $courses]);
+    }
+
+    public function dashboard()
+    {
+        $latestCourses = $this->courseModel->getLatestTeacherCourses($_SESSION['user_id'], 3);
+        $stats = [
+            'total_courses' => $this->courseModel->getTotalCoursesByTeacher($_SESSION['user_id']),
+            'total_students' => $this->courseModel->getTotalStudentsByTeacher($_SESSION['user_id'])
+        ];
+
+        $this->render('users/teacher/dashboard', [
+            'latestCourses' => $latestCourses,
+            'stats' => $stats
+        ]);
     }
 }
