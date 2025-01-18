@@ -382,7 +382,6 @@ class Course extends Model
         return $stmt->fetchAll();
     }
 
-
     public function isEnrolled($userId, $courseId)
     {
         $query = "SELECT COUNT(*) FROM inscriptions 
@@ -393,5 +392,18 @@ class Course extends Model
             'cours_id' => $courseId
         ]);
         return $stmt->fetchColumn() > 0;
+    }
+
+    public function unenroll($userId, $courseId)
+    {
+        $query = "DELETE FROM inscriptions 
+              WHERE user_id = :user_id 
+              AND cours_id = :cours_id";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'user_id' => $userId,
+            'cours_id' => $courseId
+        ]);
     }
 }

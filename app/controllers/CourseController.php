@@ -322,4 +322,16 @@ class CourseController extends Controller
             'total_pages' => $total_pages
         ]);
     }
+
+    public function unenroll($courseId)
+    {
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 1) {
+            $_SESSION['error'] = "Vous devez être connecté en tant qu'étudiant.";
+            $this->redirect('login');
+        }
+
+        $this->courseModel->unenroll($_SESSION['user_id'], $courseId);
+        $_SESSION['success'] = "Vous vous êtes désinscrit du cours avec succès.";
+        $this->redirect('student/courses');
+    }
 }

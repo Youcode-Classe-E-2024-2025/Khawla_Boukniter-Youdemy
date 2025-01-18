@@ -57,6 +57,7 @@ $router->addRoute('GET', '/courses/{id}', [CourseController::class, 'show']);
 $router->addRoute('GET', '/student/courses', [CourseController::class, 'studentCourses']);
 
 $router->addRoute('POST', '/courses/{id}/enroll', [CourseController::class, 'enroll']);
+$router->addRoute('POST', '/courses/{id}/unenroll', [CourseController::class, 'unenroll']);
 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

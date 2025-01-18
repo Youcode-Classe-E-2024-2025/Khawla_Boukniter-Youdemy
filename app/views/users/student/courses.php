@@ -32,10 +32,19 @@
                                     </p>
                                 </div>
                             </div>
-                            <a href="<?= base_url('courses/' . $course['id']) ?>"
-                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
-                                Continuer
-                            </a>
+                            <div class="flex items-center space-x-2">
+                                <a href="<?= base_url('courses/' . $course['id']) ?>"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                                    Continuer
+                                </a>
+                                <form action="<?= base_url('courses/' . $course['id'] . '/unenroll') ?>" method="POST" class="inline">
+                                    <button type="submit"
+                                        onclick="return confirm('Êtes-vous sûr de vouloir vous désinscrire de ce cours ?')"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                                        Désinscrire
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

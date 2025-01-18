@@ -55,6 +55,9 @@
                                 <a href="<?= base_url('student/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
                                     Mes cours
                                 </a>
+                                <a href="<?= base_url('dashboard') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Dashboard
+                                </a>
                             <?php elseif ($_SESSION['user_role'] === 3): ?>
                                 <a href="/admin/dashboard" class="text-gray-900 inline-flex items-center px-1 pt-1">
                                     Administration
