@@ -334,4 +334,18 @@ class CourseController extends Controller
         $_SESSION['success'] = "Vous vous êtes désinscrit du cours avec succès.";
         $this->redirect('student/courses');
     }
+
+    public function search()
+    {
+        $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
+
+        $results = empty($keyword) ? $this->courseModel->getPublishedCourses() : $this->courseModel->search($keyword);
+        $categories = $this->courseModel->getCategories();
+
+        $this->render('courses/search', [
+            'courses' => $results,
+            'keyword' => $keyword,
+            'categories' => $categories
+        ]);
+    }
 }

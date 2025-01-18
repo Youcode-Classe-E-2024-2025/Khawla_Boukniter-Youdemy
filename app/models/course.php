@@ -111,30 +111,6 @@ class Course extends Model
         return $courses;
     }
 
-    public function search($keyword)
-    {
-        $query = "SELECT 
-                    c.*,
-                    u.prenom as teacher_prenom,
-                    u.nom as teacher_nom,
-                    cat.name as category_name
-                 FROM {$this->table} c
-                 JOIN users u ON c.enseignant_id = u.id
-                 JOIN categories cat ON c.categorie_id = cat.id
-                 WHERE c.status = 'published'
-                 AND (
-                     c.titre LIKE :keyword
-                     OR c.description LIKE :keyword
-                     OR cat.name LIKE :keyword
-                 )
-                 ORDER BY c.created_at DESC
-                 LIMIT 10";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute(['keyword' => '%' . $keyword . '%']);
-        return $stmt->fetchAll();
-    }
-
     public function getWithDetails($id)
     {
         $query = "SELECT 
@@ -216,7 +192,6 @@ class Course extends Model
         $stmt->execute();
         return $stmt->fetchAll();
     }
-
 
     public function getTotalCourses()
     {
@@ -403,5 +378,32 @@ class Course extends Model
             'user_id' => $userId,
             'cours_id' => $courseId
         ]);
+    }
+
+    public function search($keyword)
+    {
+        $query = "SELECT 
+                c.*,
+                u.prenom as teacher_prenom,
+                u.nom as teacher_nom,
+                cat.name as category_name,
+                COUNT(DISTINCT e.user_id) as student_count
+             FROM cours c
+             JOIN users u ON c.enseignant_id = u.id
+             JOIN categories cat ON c.categorie_id = cat.id
+             LEFT JOIN inscriptions e ON c.id = e.cours_id
+             WHERE c.titre LIKE :keyword1 
+             OR c.description LIKE :keyword2
+             OR cat.name LIKE :keyword3
+             GROUP BY c.id, u.prenom, u.nom, cat.name
+             ORDER BY student_count DESC";
+
+        $stmt = $this->db->prepare($query);
+        $searchTerm = '%' . $keyword . '%';
+        $stmt->bindValue(':keyword1', $searchTerm, \PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', $searchTerm, \PDO::PARAM_STR);
+        $stmt->bindValue(':keyword3', $searchTerm, \PDO::PARAM_STR);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

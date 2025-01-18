@@ -53,6 +53,7 @@ $router->addRoute('GET', '/uploads/{filename}', [CourseController::class, 'serve
 // Add route for browsing courses
 $router->addRoute('GET', '/browse', [CourseController::class, 'browse']);
 $router->addRoute('GET', '/courses/{id}', [CourseController::class, 'show']);
+$router->addRoute('GET', '/search', [CourseController::class, 'search']);
 
 $router->addRoute('GET', '/student/courses', [CourseController::class, 'studentCourses']);
 
