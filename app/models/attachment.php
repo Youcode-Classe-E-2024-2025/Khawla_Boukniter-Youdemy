@@ -17,4 +17,12 @@ class Attachment extends Model
 
         return $stmt->execute($data);
     }
+
+    public function getCourseAttachment($courseId)
+    {
+        $query = "SELECT * FROM {$this->table} WHERE cours_id = :course_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['course_id' => $courseId]);
+        return $stmt->fetchAll();
+    }
 }

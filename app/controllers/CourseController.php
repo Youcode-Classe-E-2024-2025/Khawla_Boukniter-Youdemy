@@ -41,8 +41,9 @@ class CourseController extends Controller
         }
         $categorie = $this->courseModel->getCourseCategory($id);
         $tags = $this->courseModel->getCourseTags($id);
+        $attachments = $this->attachmentModel->getCourseAttachment($id);
 
-        $this->render('courses/show', ['course' => $course, 'categorie' => $categorie, 'tags' => $tags]);
+        $this->render('courses/show', ['course' => $course, 'categorie' => $categorie, 'tags' => $tags, 'attachments' => $attachments]);
     }
 
     public function create()
@@ -110,18 +111,39 @@ class CourseController extends Controller
 
     public function store()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['course_data'])) {
 
             $courseData = [
-                'titre' => $_POST['titre'],
-                'description' => $_POST['description'],
-                'categorie_id' => $_POST['categorie_id'],
+                'titre' => $_SESSION['course_data']['titre'],
+                'description' => $_SESSION['course_data']['description'],
+                'categorie_id' => $_SESSION['course_data']['categorie_id'],
                 'enseignant_id' => $_SESSION['user_id'],
-                'content_type' => $_POST['content_type'],
-                'tags' => $_POST['tags'] ?? []
+                'content_type' => $_SESSION['course_data']['content_type'],
             ];
 
             $courseId = $this->courseModel->create($courseData);
+
+            if (!empty($_SESSION['course_data']['tags'])) {
+                foreach ($_SESSION['course_data']['tags'] as $tagId) {
+                    $this->courseModel->addTag($courseId, $tagId);
+                }
+            }
+
+            if (isset($_FILES['content_file']) && $_FILES['content_file']['error'] === UPLOAD_ERR_OK) {
+                $fileName = time() . '_' . $_FILES['content_file']['name'];
+                $filePath = 'uploads/' . $fileName;
+
+                if (move_uploaded_file($_FILES['content_file']['tmp_name'], BASE_PATH . '/public/' . $filePath)) {
+                    $attachmentData = [
+                        'name' => $fileName,
+                        'path' => $filePath,
+                        'cours_id' => $courseId
+                    ];
+                    $this->attachmentModel->create($attachmentData);
+                }
+            }
+
+            unset($_SESSION['course_data']);
             $_SESSION['success'] = "Cours créé avec succès.";
             $this->redirect('dashboard');
         }
@@ -191,6 +213,29 @@ class CourseController extends Controller
             'course' => $course,
             'enrollments' => $enrollments
         ]);
+    }
+
+    public function serveFile($filename)
+    {
+        $filePath = __DIR__ . '/../../public/uploads/' . $filename;
+
+        if (file_exists($filePath)) {
+            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $mimeTypes = [
+                'pdf' => 'application/pdf',
+                'mp4' => 'video/mp4',
+                'webm' => 'video/webm'
+            ];
+
+            header('Content-Type: ' . ($mimeTypes[$extension] ?? 'application/octet-stream'));
+            header('Content-Length: ' . filesize($filePath));
+            readfile($filePath);
+            exit;
+        }
+
+        header('HTTP/1.0 404 Not Found');
+        echo 'File not found';
+        exit;
     }
 
     public function enroll($courseId)

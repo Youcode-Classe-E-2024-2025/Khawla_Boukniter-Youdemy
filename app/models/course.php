@@ -137,17 +137,19 @@ class Course extends Model
     public function getWithDetails($id)
     {
         $query = "SELECT 
-                    c.*,
-                    c.titre as course_title,
-                    c.description as course_description,
-                    c.content_type,
-                    cat.name as category_name,
-                    COUNT(DISTINCT e.user_id) as student_count
-                 FROM cours c
-                 LEFT JOIN categories cat ON c.categorie_id = cat.id
-                 LEFT JOIN inscriptions e ON c.id = e.cours_id
-                 WHERE c.id = :id
-                 GROUP BY c.id, c.titre, c.description, c.content_type, cat.name";
+                c.*,
+                u.prenom as teacher_prenom,
+                u.nom as teacher_nom,
+                cat.name as category_name,
+                a.path as content_url,
+                COUNT(DISTINCT e.user_id) as student_count
+             FROM {$this->table} c
+             JOIN users u ON c.enseignant_id = u.id
+             LEFT JOIN categories cat ON c.categorie_id = cat.id
+             LEFT JOIN attachments a ON c.id = a.cours_id
+             LEFT JOIN inscriptions e ON c.id = e.cours_id
+             WHERE c.id = :id
+             GROUP BY c.id, u.prenom, u.nom";
 
         $stmt = $this->db->prepare($query);
         $stmt->execute(['id' => $id]);

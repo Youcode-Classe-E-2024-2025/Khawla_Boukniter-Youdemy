@@ -49,6 +49,9 @@ $router->addRoute('POST', '/teacher/delete_course/{id}', [CourseController::clas
 $router->addRoute('GET', '/teacher/courses/{id}/enrollments', [CourseController::class, 'viewEnrollments']);
 $router->addRoute('GET', '/users/teacher/courses', [CourseController::class, 'teacherCourses']);
 $router->addRoute('POST', '/teacher/courses', [CourseController::class, 'index']);
+$router->addRoute('GET', '/courses/{id}', [CourseController::class, 'show']);
+$router->addRoute('GET', '/uploads/{filename}', [CourseController::class, 'serveFile']);
+
 
 $router->addRoute('GET', '', [CourseController::class, 'browse']);
 
