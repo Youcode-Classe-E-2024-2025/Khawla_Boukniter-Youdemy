@@ -15,7 +15,18 @@ class Attachment extends Model
         $sql = "INSERT INTO {$this->table} (name, path, cours_id) VALUES (:name, :path, :cours_id)";
         $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute($data);
+        try {
+            $result = $stmt->execute([
+                'name' => $data['name'],
+                'path' => $data['path'],
+                'cours_id' => $data['cours_id']
+            ]);
+            error_log("Attachment creation result: " . ($result ? "success" : "failed"));
+            return $result;
+        } catch (\PDOException $e) {
+            error_log("Error creating attachment: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getCourseAttachment($courseId)

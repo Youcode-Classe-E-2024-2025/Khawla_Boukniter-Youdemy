@@ -12,13 +12,14 @@ class Course extends Model
         'description',
         'categorie_id',
         'enseignant_id',
+        'content_type',
     ];
 
     public function create($data)
     {
         error_log("Creating course with data: " . print_r($data, true));
 
-        $sql = "INSERT INTO cours (titre, description, categorie_id, enseignant_id) VALUES (:titre, :description, :categorie_id, :enseignant_id)";
+        $sql = "INSERT INTO cours (titre, description, categorie_id, enseignant_id, content_type) VALUES (:titre, :description, :categorie_id, :enseignant_id, :content_type)";
 
         try {
             $stmt = $this->db->prepare($sql);
@@ -27,6 +28,7 @@ class Course extends Model
                 'description' => $data['description'],
                 'categorie_id' => $data['categorie_id'],
                 'enseignant_id' => $data['enseignant_id'],
+                'content_type' => $data['content_type'],
             ]);
 
             if ($resultat) {
@@ -142,6 +144,8 @@ class Course extends Model
                 u.nom as teacher_nom,
                 cat.name as category_name,
                 a.path as content_url,
+                a.name as content_name,
+                c.content_type,
                 COUNT(DISTINCT e.user_id) as student_count
              FROM {$this->table} c
              JOIN users u ON c.enseignant_id = u.id
@@ -149,7 +153,7 @@ class Course extends Model
              LEFT JOIN attachments a ON c.id = a.cours_id
              LEFT JOIN inscriptions e ON c.id = e.cours_id
              WHERE c.id = :id
-             GROUP BY c.id, u.prenom, u.nom";
+             GROUP BY c.id, u.prenom, u.nom, c.content_type";
 
         $stmt = $this->db->prepare($query);
         $stmt->execute(['id' => $id]);

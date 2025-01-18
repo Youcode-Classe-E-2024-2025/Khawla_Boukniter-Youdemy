@@ -27,7 +27,7 @@
                             Importer une vidéo
                         </label>
                         <input type="file"
-                            name="video_content"
+                            name="content_file"
                             accept="video/*"
                             required
                             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
@@ -39,7 +39,7 @@
                             Contenu du document
                         </label>
                         <textarea id="document_content"
-                            name="document_content"
+                            name="content_file"
                             required
                             tabindex="0"
                             aria-required="true"

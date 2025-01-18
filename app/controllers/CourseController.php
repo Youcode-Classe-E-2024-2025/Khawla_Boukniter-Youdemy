@@ -112,15 +112,18 @@ class CourseController extends Controller
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['course_data'])) {
+            error_log("Content type received: " . $_SESSION['course_data']['content_type']);
+
 
             $courseData = [
                 'titre' => $_SESSION['course_data']['titre'],
                 'description' => $_SESSION['course_data']['description'],
                 'categorie_id' => $_SESSION['course_data']['categorie_id'],
                 'enseignant_id' => $_SESSION['user_id'],
-                'content_type' => $_SESSION['course_data']['content_type'],
+                'content_type' => $_SESSION['course_data']['content_type']
             ];
 
+            error_log("Creating course with data: " . print_r($courseData, true));
             $courseId = $this->courseModel->create($courseData);
 
             if (!empty($_SESSION['course_data']['tags'])) {
@@ -129,19 +132,26 @@ class CourseController extends Controller
                 }
             }
 
-            if (isset($_FILES['content_file']) && $_FILES['content_file']['error'] === UPLOAD_ERR_OK) {
+            if ($_SESSION['course_data']['content_type'] === 'video' && isset($_FILES['content_file'])) {
                 $fileName = time() . '_' . $_FILES['content_file']['name'];
+                $uploadDir = BASE_PATH . '/public/uploads/';
                 $filePath = 'uploads/' . $fileName;
 
-                if (move_uploaded_file($_FILES['content_file']['tmp_name'], BASE_PATH . '/public/' . $filePath)) {
+                if (move_uploaded_file($_FILES['content_file']['tmp_name'], $uploadDir . $fileName)) {
                     $attachmentData = [
-                        'name' => $fileName,
+                        'name' => $_FILES['content_file']['name'],
                         'path' => $filePath,
                         'cours_id' => $courseId
                     ];
                     $this->attachmentModel->create($attachmentData);
                 }
             }
+            // Handle document content
+            elseif ($_SESSION['course_data']['content_type'] === 'document') {
+                $content = $_POST['content_file'];
+                // Store document content logic here
+            }
+
 
             unset($_SESSION['course_data']);
             $_SESSION['success'] = "Cours créé avec succès.";
@@ -215,28 +225,28 @@ class CourseController extends Controller
         ]);
     }
 
-    public function serveFile($filename)
-    {
-        $filePath = __DIR__ . '/../../public/uploads/' . $filename;
+    // public function serveFile($filename)
+    // {
+    //     $filePath = __DIR__ . '/../../public/uploads/' . $filename;
 
-        if (file_exists($filePath)) {
-            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            $mimeTypes = [
-                'pdf' => 'application/pdf',
-                'mp4' => 'video/mp4',
-                'webm' => 'video/webm'
-            ];
+    //     if (file_exists($filePath)) {
+    //         $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+    //         $mimeTypes = [
+    //             'pdf' => 'application/pdf',
+    //             'mp4' => 'video/mp4',
+    //             'webm' => 'video/webm'
+    //         ];
 
-            header('Content-Type: ' . ($mimeTypes[$extension] ?? 'application/octet-stream'));
-            header('Content-Length: ' . filesize($filePath));
-            readfile($filePath);
-            exit;
-        }
+    //         header('Content-Type: ' . ($mimeTypes[$extension] ?? 'application/octet-stream'));
+    //         header('Content-Length: ' . filesize($filePath));
+    //         readfile($filePath);
+    //         exit;
+    //     }
 
-        header('HTTP/1.0 404 Not Found');
-        echo 'File not found';
-        exit;
-    }
+    //     header('HTTP/1.0 404 Not Found');
+    //     echo 'File not found';
+    //     exit;
+    // }
 
     public function enroll($courseId)
     {
