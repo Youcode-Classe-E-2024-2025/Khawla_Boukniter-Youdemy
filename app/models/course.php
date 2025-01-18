@@ -223,8 +223,8 @@ class Course extends Model
 
     public function getTotalCourses()
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table} WHERE enseignant_id = :teacherId");
-        $stmt->execute(['teacherId' => $_SESSION['user_id']]);
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM {$this->table}");
+        $stmt->execute();
         return $stmt->fetchColumn();
     }
 

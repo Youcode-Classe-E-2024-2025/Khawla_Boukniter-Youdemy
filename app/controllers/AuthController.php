@@ -143,9 +143,9 @@ class AuthController extends Controller
                 }
 
                 $loginResult = $this->login();
-                
+
                 error_log("Résultat de connexion : " . ($loginResult ? 'Succès' : 'Échec'));
-                
+
                 if ($loginResult) {
                     unset($_SESSION['signup_form']);
                     unset($_SESSION['signup_error']);
@@ -158,11 +158,9 @@ class AuthController extends Controller
                     } else {
                         redirect('student/dashboard');
                     }
-
                 } else {
                     throw new Exception('Échec de la connexion après inscription.');
                 }
-
             } catch (Exception $e) {
                 $_SESSION['signup_error'] = $e->getMessage();
                 redirect('auth/register');

@@ -23,14 +23,35 @@ class CourseController extends Controller
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $limit = 12;
         $filters = [];
+
         $courses = $this->courseModel->getPublishedCourses($filters, $page, $limit);
 
         $total = $this->courseModel->getTotalCourses();
+
         $pages = ceil($total / $limit);
 
         $categories = $this->courseModel->getCategories();
 
         $this->render('index', ['courses' => $courses, 'categories' => $categories, 'pages' => $pages, 'page' => $page]);
+    }
+
+    public function browse()
+    {
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 12;
+        $filters = [];
+
+        $courses = $this->courseModel->getPublishedCourses($filters, $page, $limit);
+        $total = $this->courseModel->getTotalCourses();
+        $pages = ceil($total / $limit);
+        $categories = $this->courseModel->getCategories();
+
+        $this->render('courses/index', [
+            'courses' => $courses,
+            'categories' => $categories,
+            'pages' => $pages,
+            'page' => $page
+        ]);
     }
 
     public function show($id)
@@ -155,7 +176,6 @@ class CourseController extends Controller
                     mkdir($uploadDir, 0777, true);
                 }
 
-                // Save TinyMCE content as Markdown
                 file_put_contents($uploadDir . $fileName, $content);
 
                 $attachmentData = [

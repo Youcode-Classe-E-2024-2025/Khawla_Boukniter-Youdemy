@@ -20,16 +20,21 @@ class DashboardController extends Controller
 
     public function index()
     {
-        $courseModel = new Course();
-        $latestCourses = $courseModel->getLatestTeacherCourses($_SESSION['user_id'], 3);
-        $stats = [
-            'total_courses' => $courseModel->getTotalCoursesByTeacher($_SESSION['user_id']),
-            'total_students' => $courseModel->getTotalStudentsByTeacher($_SESSION['user_id'])
-        ];
+        if ($_SESSION['user_role'] == 1) {
 
-        $this->render('users/teacher/dashboard', [
-            'latestCourses' => $latestCourses,
-            'stats' => $stats
-        ]);
+            $this->render('users/student/dashboard');
+        } else if ($_SESSION['user_role'] == 2) {
+
+            $latestCourses = $this->courseModel->getLatestTeacherCourses($_SESSION['user_id'], 3);
+            $stats = [
+                'total_courses' => $this->courseModel->getTotalCoursesByTeacher($_SESSION['user_id']),
+                'total_students' => $this->courseModel->getTotalStudentsByTeacher($_SESSION['user_id'])
+            ];
+
+            $this->render('users/teacher/dashboard', [
+                'latestCourses' => $latestCourses,
+                'stats' => $stats
+            ]);
+        }
     }
 }

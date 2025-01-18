@@ -36,6 +36,7 @@ $router->addRoute('POST', '/choose_role', [AuthController::class, 'chooseRole'])
 $router->addRoute('GET', '/logout', [AuthController::class, 'logout']);
 
 $router->addRoute('GET', '/dashboard', [DashboardController::class, 'index']);
+// $router->addRoute('GET', '/dashboard', [DashboardController::class, 'studentDashboard']);
 
 // $router->addRoute('GET', '/courses', [DashboardController::class, 'index']);
 
@@ -51,6 +52,13 @@ $router->addRoute('GET', '/users/teacher/courses', [CourseController::class, 'te
 $router->addRoute('POST', '/teacher/courses', [CourseController::class, 'index']);
 $router->addRoute('GET', '/courses/{id}', [CourseController::class, 'show']);
 $router->addRoute('GET', '/uploads/{filename}', [CourseController::class, 'serveFile']);
+
+// Add route for browsing courses
+$router->addRoute('GET', '/browse', [CourseController::class, 'browse']);
+$router->addRoute('GET', '/courses/{id}', [CourseController::class, 'show']);
+
+
+
 
 
 $router->addRoute('GET', '', [CourseController::class, 'browse']);
