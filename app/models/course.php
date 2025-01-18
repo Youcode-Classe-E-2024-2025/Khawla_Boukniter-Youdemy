@@ -380,8 +380,10 @@ class Course extends Model
         ]);
     }
 
-    public function search($keyword)
+    public function search($keyword, $page = 1, $limit = 12)
     {
+        $offset = ($page - 1) * $limit;
+
         $query = "SELECT 
                 c.*,
                 u.prenom as teacher_prenom,
@@ -396,7 +398,28 @@ class Course extends Model
              OR c.description LIKE :keyword2
              OR cat.name LIKE :keyword3
              GROUP BY c.id, u.prenom, u.nom, cat.name
-             ORDER BY student_count DESC";
+             ORDER BY student_count DESC
+             LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->db->prepare($query);
+        $searchTerm = '%' . $keyword . '%';
+        $stmt->bindValue(':keyword1', $searchTerm, \PDO::PARAM_STR);
+        $stmt->bindValue(':keyword2', $searchTerm, \PDO::PARAM_STR);
+        $stmt->bindValue(':keyword3', $searchTerm, \PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getTotalSearchResults($keyword)
+    {
+        $query = "SELECT COUNT(DISTINCT c.id)
+             FROM cours c
+             JOIN categories cat ON c.categorie_id = cat.id
+             WHERE c.titre LIKE :keyword1 
+             OR c.description LIKE :keyword2
+             OR cat.name LIKE :keyword3";
 
         $stmt = $this->db->prepare($query);
         $searchTerm = '%' . $keyword . '%';
@@ -404,6 +427,6 @@ class Course extends Model
         $stmt->bindValue(':keyword2', $searchTerm, \PDO::PARAM_STR);
         $stmt->bindValue(':keyword3', $searchTerm, \PDO::PARAM_STR);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchColumn();
     }
 }

@@ -338,14 +338,27 @@ class CourseController extends Controller
     public function search()
     {
         $keyword = isset($_GET['q']) ? trim($_GET['q']) : '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 12;
 
-        $results = empty($keyword) ? $this->courseModel->getPublishedCourses() : $this->courseModel->search($keyword);
+        $results = empty($keyword) ?
+            $this->courseModel->getPublishedCourses([], $page, $limit) :
+            $this->courseModel->search($keyword, $page, $limit);
+
+        $total = empty($keyword) ?
+            $this->courseModel->getTotalCourses() :
+            $this->courseModel->getTotalSearchResults($keyword);
+
+        $total_pages = ceil($total / $limit);
         $categories = $this->courseModel->getCategories();
 
         $this->render('courses/search', [
             'courses' => $results,
             'keyword' => $keyword,
-            'categories' => $categories
+            'categories' => $categories,
+            'current_page' => $page,
+            'total_pages' => $total_pages,
+            'total' => $total
         ]);
     }
 }
