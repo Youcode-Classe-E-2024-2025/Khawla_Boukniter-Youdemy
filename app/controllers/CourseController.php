@@ -145,11 +145,25 @@ class CourseController extends Controller
                     ];
                     $this->attachmentModel->create($attachmentData);
                 }
-            }
-            // Handle document content
-            elseif ($_SESSION['course_data']['content_type'] === 'document') {
+            } elseif ($_SESSION['course_data']['content_type'] === 'document') {
                 $content = $_POST['content_file'];
-                // Store document content logic here
+                $fileName = time() . '_' . str_replace([' ', '/', '\\'], '-', $courseData['titre']) . '.md';
+                $uploadDir = BASE_PATH . '/public/uploads/';
+                $filePath = 'uploads/' . $fileName;
+
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                // Save TinyMCE content as Markdown
+                file_put_contents($uploadDir . $fileName, $content);
+
+                $attachmentData = [
+                    'name' => $fileName,
+                    'path' => $filePath,
+                    'cours_id' => $courseId
+                ];
+                $this->attachmentModel->create($attachmentData);
             }
 
 
@@ -224,29 +238,6 @@ class CourseController extends Controller
             'enrollments' => $enrollments
         ]);
     }
-
-    // public function serveFile($filename)
-    // {
-    //     $filePath = __DIR__ . '/../../public/uploads/' . $filename;
-
-    //     if (file_exists($filePath)) {
-    //         $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-    //         $mimeTypes = [
-    //             'pdf' => 'application/pdf',
-    //             'mp4' => 'video/mp4',
-    //             'webm' => 'video/webm'
-    //         ];
-
-    //         header('Content-Type: ' . ($mimeTypes[$extension] ?? 'application/octet-stream'));
-    //         header('Content-Length: ' . filesize($filePath));
-    //         readfile($filePath);
-    //         exit;
-    //     }
-
-    //     header('HTTP/1.0 404 Not Found');
-    //     echo 'File not found';
-    //     exit;
-    // }
 
     public function enroll($courseId)
     {
