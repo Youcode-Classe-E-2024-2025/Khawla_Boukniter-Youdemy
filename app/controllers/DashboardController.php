@@ -22,7 +22,10 @@ class DashboardController extends Controller
     {
         if ($_SESSION['user_role'] == 1) {
 
-            $this->render('users/student/dashboard');
+            $enrolled_courses = $this->courseModel->getEnrolledCoursesCount($_SESSION['user_id']);
+            $recentCourses = $this->courseModel->getStudentRecentCourses($_SESSION['user_id']);
+
+            $this->render('users/student/dashboard', ['enrolled_courses' => $enrolled_courses, 'recentCourses' => $recentCourses]);
         } else if ($_SESSION['user_role'] == 2) {
 
             $latestCourses = $this->courseModel->getLatestTeacherCourses($_SESSION['user_id'], 3);

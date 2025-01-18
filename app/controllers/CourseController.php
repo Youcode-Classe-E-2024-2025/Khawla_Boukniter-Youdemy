@@ -64,7 +64,12 @@ class CourseController extends Controller
         $tags = $this->courseModel->getCourseTags($id);
         $attachments = $this->attachmentModel->getCourseAttachment($id);
 
-        $this->render('courses/show', ['course' => $course, 'categorie' => $categorie, 'tags' => $tags, 'attachments' => $attachments]);
+        $isEnrolled = false;
+        if (isset($_SESSION['user_id'])) {
+            $isEnrolled = $this->courseModel->isEnrolled($_SESSION['user_id'], $id);
+        }
+
+        $this->render('courses/show', ['course' => $course, 'categorie' => $categorie, 'tags' => $tags, 'attachments' => $attachments, 'isEnrolled' => $isEnrolled]);
     }
 
     public function create()
@@ -294,6 +299,27 @@ class CourseController extends Controller
         $this->render('users/teacher/dashboard', [
             'latestCourses' => $latestCourses,
             'stats' => $stats
+        ]);
+    }
+
+    public function studentCourses()
+    {
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 1) {
+            $this->redirect('login');
+        }
+
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = 12;
+        $offset = ($page - 1) * $limit;
+
+        $enrolledCourses = $this->courseModel->getStudentCourses($_SESSION['user_id'], $limit, $offset);
+        $total_courses = $this->courseModel->getEnrolledCoursesCount($_SESSION['user_id']);
+        $total_pages = ceil($total_courses / $limit);
+
+        $this->render('users/student/courses', [
+            'enrolledCourses' => $enrolledCourses,
+            'current_page' => $page,
+            'total_pages' => $total_pages
         ]);
     }
 }

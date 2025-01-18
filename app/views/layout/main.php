@@ -49,10 +49,10 @@
                                     Dashboard
                                 </a>
                             <?php elseif ($_SESSION['user_role'] === 1): ?>
-                                <a href="<?= base_url('users/student/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                <a href="<?= base_url('browse') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
                                     Cours
                                 </a>
-                                <a href="/student/courses" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                <a href="<?= base_url('student/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
                                     Mes cours
                                 </a>
                             <?php elseif ($_SESSION['user_role'] === 3): ?>

@@ -111,7 +111,6 @@ class Course extends Model
         return $courses;
     }
 
-
     public function search($keyword)
     {
         $query = "SELECT 
@@ -316,5 +315,83 @@ class Course extends Model
         $stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function enroll($userId, $courseId)
+    {
+        $query = "INSERT INTO inscriptions (user_id, cours_id, inscription_date) 
+                  VALUES (:user_id, :cours_id, NOW())";
+
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute([
+            'user_id' => $userId,
+            'cours_id' => $courseId
+        ]);
+    }
+
+    public function getEnrolledCoursesCount($userId)
+    {
+        $query = "SELECT COUNT(*) FROM inscriptions WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetchColumn();
+    }
+
+    public function getStudentRecentCourses($userId, $limit = 3)
+    {
+        $query = "SELECT 
+                    c.*,
+                    u.prenom as teacher_prenom,
+                    u.nom as teacher_nom,
+                    cat.name as category_name
+                  FROM cours c
+                  JOIN inscriptions i ON c.id = i.cours_id
+                  JOIN users u ON c.enseignant_id = u.id
+                  JOIN categories cat ON c.categorie_id = cat.id
+                  WHERE i.user_id = :user_id
+                  ORDER BY i.inscription_date DESC
+                  LIMIT :limit";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getStudentCourses($userId, $limit = 12, $offset = 0)
+    {
+        $query = "SELECT 
+                c.*,
+                u.prenom as teacher_prenom,
+                u.nom as teacher_nom,
+                cat.name as category_name
+              FROM cours c
+              JOIN inscriptions i ON c.id = i.cours_id
+              JOIN users u ON c.enseignant_id = u.id
+              JOIN categories cat ON c.categorie_id = cat.id
+              WHERE i.user_id = :user_id
+              ORDER BY i.inscription_date DESC
+              LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':user_id', $userId, \PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+
+    public function isEnrolled($userId, $courseId)
+    {
+        $query = "SELECT COUNT(*) FROM inscriptions 
+                  WHERE user_id = :user_id AND cours_id = :cours_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([
+            'user_id' => $userId,
+            'cours_id' => $courseId
+        ]);
+        return $stmt->fetchColumn() > 0;
     }
 }

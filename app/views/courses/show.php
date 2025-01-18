@@ -67,13 +67,17 @@
                             </iframe>
                         </div>
                         <?php if (isset($_SESSION['user_id']) && $_SESSION['user_role'] === 1): ?>
-                            <div class="mt-8">
+                            <?php if ($isEnrolled): ?>
+                                <button disabled class="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600">
+                                    Déjà inscrit
+                                </button>
+                            <?php else: ?>
                                 <form action="<?= base_url('courses/' . $course['id'] . '/enroll') ?>" method="POST">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                                         S'inscrire au cours
                                     </button>
                                 </form>
-                            </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     <?php else: ?>
                         <div class="bg-gray-50 rounded-lg p-4">
