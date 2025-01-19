@@ -2,6 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Core\CourseContent\VideoContent;
+use App\Core\CourseContent\DocumentContent;
+use App\Core\CourseContent\CourseContentInterface;
+
 use App\Core\Controller;
 use App\Models\Course;
 use App\Models\Attachment;
@@ -160,7 +164,6 @@ class CourseController extends Controller
                 'content_type' => $_SESSION['course_data']['content_type']
             ];
 
-            error_log("Creating course with data: " . print_r($courseData, true));
             $courseId = $this->courseModel->create($courseData);
 
             if (!empty($_SESSION['course_data']['tags'])) {
@@ -169,44 +172,30 @@ class CourseController extends Controller
                 }
             }
 
-            if ($_SESSION['course_data']['content_type'] === 'video' && isset($_FILES['content_file'])) {
-                $fileName = time() . '_' . $_FILES['content_file']['name'];
-                $uploadDir = BASE_PATH . '/public/uploads/';
-                $filePath = 'uploads/' . $fileName;
+            $contentHandler = $this->getContentHandler($_SESSION['course_data']['content_type']);
+            $content = $_SESSION['course_data']['content_type'] === 'video' ? $_FILES['content_file'] : $_POST['content_file'];
 
-                if (move_uploaded_file($_FILES['content_file']['tmp_name'], $uploadDir . $fileName)) {
-                    $attachmentData = [
-                        'name' => $_FILES['content_file']['name'],
-                        'path' => $filePath,
-                        'cours_id' => $courseId
-                    ];
-                    $this->attachmentModel->create($attachmentData);
-                }
-            } elseif ($_SESSION['course_data']['content_type'] === 'document') {
-                $content = $_POST['content_file'];
-                $fileName = time() . '_' . str_replace([' ', '/', '\\'], '-', $courseData['titre']) . '.md';
-                $uploadDir = BASE_PATH . '/public/uploads/';
-                $filePath = 'uploads/' . $fileName;
-
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0777, true);
-                }
-
-                file_put_contents($uploadDir . $fileName, $content);
-
-                $attachmentData = [
-                    'name' => $fileName,
-                    'path' => $filePath,
-                    'cours_id' => $courseId
-                ];
-                $this->attachmentModel->create($attachmentData);
-            }
+            $attachmentData = $contentHandler->save($courseId, $content);
+            $this->attachmentModel->create([
+                'name' => $attachmentData['name'],
+                'path' => $attachmentData['path'],
+                'cours_id' => $courseId
+            ]);
 
 
             unset($_SESSION['course_data']);
             $_SESSION['success'] = "Cours créé avec succès.";
             $this->redirect('dashboard');
         }
+    }
+
+    private function getContentHandler($contentType): CourseContentInterface
+    {
+        return match ($contentType) {
+            'video' => new VideoContent(),
+            'document' => new DocumentContent(),
+            default => throw new \InvalidArgumentException("Type de contenu non supporté")
+        };
     }
 
     public function edit($id)
