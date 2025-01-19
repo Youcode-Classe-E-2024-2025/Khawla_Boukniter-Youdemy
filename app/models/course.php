@@ -254,22 +254,34 @@ class Course extends Model
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function getTeacherCourses($teacherId)
+    public function getTeacherCourses($teacherId, $limit = null, $offset = null)
     {
         $query = "SELECT 
-                      c.*, 
-                      cat.name as category_name,
-                      COUNT(DISTINCT e.user_id) as student_count
-                    FROM cours c
-                    LEFT JOIN categories cat ON c.categorie_id = cat.id
-                    LEFT JOIN inscriptions e ON c.id = e.cours_id
-                    WHERE c.enseignant_id = :teacher_id
-                    GROUP BY c.id, cat.name";
+                c.*, 
+                cat.name as category_name,
+                COUNT(DISTINCT e.user_id) as student_count
+              FROM cours c
+              LEFT JOIN categories cat ON c.categorie_id = cat.id
+              LEFT JOIN inscriptions e ON c.id = e.cours_id
+              WHERE c.enseignant_id = :teacher_id
+              GROUP BY c.id, cat.name";
+
+        if ($limit !== null) {
+            $query .= " LIMIT :limit OFFSET :offset";
+        }
 
         $stmt = $this->db->prepare($query);
-        $stmt->execute(['teacher_id' => $teacherId]);
+        $stmt->bindValue(':teacher_id', $teacherId, \PDO::PARAM_INT);
+
+        if ($limit !== null) {
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
 
     public function getLatestTeacherCourses($teacherId, $limit = 3)
     {

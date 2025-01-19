@@ -278,14 +278,24 @@ class CourseController extends Controller
 
     public function teacherCourses()
     {
-        $courses = $this->courseModel->getTeacherCourses($_SESSION['user_id']);
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $perPage = 12;
+        $offset = ($currentPage - 1) * $perPage;
+
+        $totalCourses = $this->courseModel->getTotalCoursesByTeacher($_SESSION['user_id']);
+        $courses = $this->courseModel->getTeacherCourses($_SESSION['user_id'], $perPage, $offset);
+        $totalPages = ceil($totalCourses / $perPage);
 
         foreach ($courses as &$course) {
             $course['category'] = $this->courseModel->getCourseCategory($course['id']);
             $course['tags'] = $this->courseModel->getCourseTags($course['id']);
         }
 
-        $this->render('users/teacher/courses', ['courses' => $courses]);
+        $this->render('users/teacher/courses', [
+            'courses' => $courses,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages
+        ]);
     }
 
     public function dashboard()
