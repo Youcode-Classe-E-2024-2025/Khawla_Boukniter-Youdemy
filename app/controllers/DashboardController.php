@@ -38,6 +38,21 @@ class DashboardController extends Controller
                 'latestCourses' => $latestCourses,
                 'stats' => $stats
             ]);
+        } else if ($_SESSION['user_role'] == 3) {
+            $stats = [
+                'total_users' => $this->userModel->getTotalUsers(),
+                'total_courses' => $this->courseModel->getTotalCourses(),
+                'total_teachers' => $this->userModel->getTotalTeachers(),
+                'pending_teachers' => $this->userModel->getPendingTeachers(),
+            ];
+
+            $topCourses = $this->courseModel->getTopCourses(5);
+            $topTeachers = $this->userModel->getTopTeachers(3);
+            $this->render('users/admin/dashboard', [
+                'stats' => $stats,
+                'topCourses' => $topCourses,
+                'topTeachers' => $topTeachers
+            ]);
         }
     }
 }

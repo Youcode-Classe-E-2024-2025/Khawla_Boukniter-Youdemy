@@ -94,29 +94,111 @@ class User
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    public function verifyPassword(string $password, string $hash): bool
+    public function updateStatus($id, $status)
     {
-        return password_verify($password, $hash);
-    }
-
-    public function update(int $id, array $data): bool
-    {
-        $sql = "UPDATE users SET nom = :nom, prenom = :prenom, email = :email WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-
+        $query = "UPDATE users SET is_active = :status WHERE id = :id AND role_id != 3";
+        $stmt = $this->db->prepare($query);
         return $stmt->execute([
-            'nom' => $data['nom'],
-            'prenom' => $data['prenom'],
-            'email' => $data['email'],
-            'id' => $id
+            'id' => $id,
+            'status' => $status
         ]);
     }
 
-    public function delete(int $id): bool
+    public function delete($id)
     {
-        $sql = "DELETE FROM users WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
+        $query = "SELECT role_id FROM users WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id' => $id]);
+        $user = $stmt->fetch();
+
+        if ($user['role_id'] === 3) {
+            return false;
+        }
+
+        $query = "DELETE FROM inscriptions WHERE user_id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id' => $id]);
+
+        $query = "DELETE FROM users WHERE id = :id AND role_id != 3";
+        $stmt = $this->db->prepare($query);
         return $stmt->execute(['id' => $id]);
+    }
+
+    public function getTotalUsers()
+    {
+        $stmt = $this->db->query("SELECT COUNT(*) FROM users");
+        return $stmt->fetchColumn();
+    }
+
+    public function getTotalTeachers()
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE role_id = 2");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public function getPendingTeachers()
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE role_id = 2 AND is_validated = 0");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    public function getTopTeachers($limit = 3)
+    {
+        $query = "SELECT 
+                u.*, 
+                COUNT(DISTINCT c.id) as course_count,
+                COUNT(DISTINCT i.user_id) as student_count
+              FROM users u
+              LEFT JOIN cours c ON u.id = c.enseignant_id
+              LEFT JOIN inscriptions i ON c.id = i.cours_id
+              WHERE u.role_id = 2
+              GROUP BY u.id
+              ORDER BY student_count DESC
+              LIMIT :limit";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getPendingTeachersDetails()
+    {
+        $query = "SELECT id, nom, prenom, email, created_at 
+              FROM users 
+              WHERE role_id = 2 AND is_validated = 0 
+              ORDER BY created_at DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function validateTeacher($id)
+    {
+        $query = "UPDATE users SET is_validated = 1 WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute(['id' => $id]);
+    }
+
+    public function rejectTeacher($id)
+    {
+        $query = "UPDATE users SET role_id = 1, is_validated = 1 WHERE id = :id AND role_id = 2";
+        $stmt = $this->db->prepare($query);
+        return $stmt->execute(['id' => $id]);
+    }
+
+    public function getAllUsersWithDetails()
+    {
+        $query = "SELECT u.*, r.nom as role_name 
+              FROM users u 
+              JOIN roles r ON u.role_id = r.id 
+              ORDER BY u.created_at DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

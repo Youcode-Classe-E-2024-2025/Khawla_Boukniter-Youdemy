@@ -20,6 +20,8 @@ use App\Controllers\CourseController;
 use App\Controllers\CategoryController;
 use App\Controllers\UserController;
 use App\Controllers\DashboardController;
+use App\Controllers\AdminController;
+use App\Controllers\CategoriesTagsController;
 
 $router = new Router();
 
@@ -59,6 +61,25 @@ $router->addRoute('GET', '/student/courses', [CourseController::class, 'studentC
 
 $router->addRoute('POST', '/courses/{id}/enroll', [CourseController::class, 'enroll']);
 $router->addRoute('POST', '/courses/{id}/unenroll', [CourseController::class, 'unenroll']);
+
+$router->addRoute('GET', '/users/admin/inscriptions', [UserController::class, 'inscriptions']);
+$router->addRoute('GET', '/users/admin/courses', [CourseController::class, 'adminCourses']);
+$router->addRoute('POST', '/admin/courses/delete/{id}', [CourseController::class, 'adminDeleteCourse']);
+$router->addRoute('GET', '/users/admin/categories-tags', [CategoriesTagsController::class, 'index']);
+$router->addRoute('GET', '/users/admin/users', [UserController::class, 'users']);
+
+// Admin Actions
+$router->addRoute('POST', '/admin/validate-teacher', [UserController::class, 'validateTeacher']);
+$router->addRoute('POST', '/admin/reject-teacher', [UserController::class, 'rejectTeacher']);
+
+$router->addRoute('POST', '/admin/categories/add', [CategoriesTagsController::class, 'addCategory']);
+$router->addRoute('POST', '/admin/categories/delete/{id}', [CategoriesTagsController::class, 'deleteCategory']);
+$router->addRoute('POST', '/admin/tags/add', [CategoriesTagsController::class, 'addTags']);
+$router->addRoute('POST', '/admin/tags/delete/{id}', [CategoriesTagsController::class, 'deleteTag']);
+
+$router->addRoute('POST', '/admin/users/activate/{id}', [UserController::class, 'activateUser']);
+$router->addRoute('POST', '/admin/users/suspend/{id}', [UserController::class, 'suspendUser']);
+$router->addRoute('POST', '/admin/users/delete/{id}', [UserController::class, 'deleteUser']);
 
 
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

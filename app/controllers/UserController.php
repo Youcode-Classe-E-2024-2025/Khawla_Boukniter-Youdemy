@@ -29,50 +29,74 @@ class UserController extends Controller
         $this->redirect("users");
     }
 
-    public function edit($id)
+    public function deleteUser($id)
     {
-        error_log("Editing user with ID: " . $id);
-        error_log("Calling findById with ID: " . $id);
-        $user = $this->userModel->findById($id);
-
-        if (!$user) {
-            error_log("User not found for ID: " . $id);
-            echo "User not found.";
-            exit;
+        if ($this->isPost()) {
+            if ($this->userModel->delete($id)) {
+                $_SESSION['success'] = "Utilisateur supprimé avec succès";
+            } else {
+                $_SESSION['error'] = "Erreur lors de la suppression de l'utilisateur";
+            }
+            $this->redirect('users/admin/users');
         }
-        $this->render("users/edit", ["user" => $user]);
     }
 
-    public function update($id)
+    public function suspendUser($id)
     {
-        $data = $_POST;
-        $this->userModel->update($id, $data);
-        $this->redirect('users');
-        exit;
-    }
-
-    public function delete($id)
-    {
-        $this->userModel->delete($id);
-        $this->redirect('users');
-        exit;
-    }
-
-    public function manageRole($id)
-    {
-        $user = $this->userModel->findById($id);
-        if (!$user) {
-            echo "User not found.";
-            exit;
+        if ($this->userModel->updateStatus($id, 0)) {
+            $_SESSION['success'] = "Utilisateur suspendu avec succès";
+        } else {
+            $_SESSION['error'] = "Erreur lors de la suspension de l'utilisateur";
         }
-        $this->render("users", ["user" => $user]);
+        $this->redirect('users/admin/users');
     }
 
-    public function updateRole($id)
+    public function activateUser($id)
     {
-        $data = $_POST;
-        $this->userModel->setRole($id, $data["role"]);
-        $this->redirect("users");
-        exit;
+        if ($this->userModel->updateStatus($id, 1)) {
+            $_SESSION['success'] = "Utilisateur activé avec succès";
+        } else {
+            $_SESSION['error'] = "Erreur lors de l'activation de l'utilisateur";
+        }
+        $this->redirect('users/admin/users');
+    }
+
+    public function inscriptions()
+    {
+        $pendingTeachers = $this->userModel->getPendingTeachersDetails();
+        $this->render('users/admin/inscriptions', ['pendingTeachers' => $pendingTeachers]);
+    }
+
+    public function validateTeacher()
+    {
+        if ($this->isPost()) {
+            $userId = $_POST['user_id'];
+            if ($this->userModel->validateTeacher($userId)) {
+                $_SESSION['success'] = "Enseignant validé avec succès";
+            } else {
+                $_SESSION['error'] = "Erreur lors de la validation de l'enseignant";
+            }
+            $this->redirect('users/admin/inscriptions');
+        }
+    }
+
+    public function rejectTeacher()
+    {
+        if ($this->isPost()) {
+            $userId = $_POST['user_id'];
+            if ($this->userModel->rejectTeacher($userId)) {
+                $_SESSION['success'] = "Enseignant rejeté avec succès";
+            } else {
+                $_SESSION['error'] = "Erreur lors du rejet de l'enseignant";
+            }
+            $this->redirect('users/admin/inscriptions');
+        }
+    }
+
+
+    public function users()
+    {
+        $users = $this->userModel->getAllUsersWithDetails();
+        $this->render('users/admin/users', ['users' => $users]);
     }
 }

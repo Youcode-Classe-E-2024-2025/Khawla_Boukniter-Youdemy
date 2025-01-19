@@ -79,11 +79,13 @@
                                 </form>
                             <?php endif; ?>
                         <?php else: ?>
-                            <form action="<?= base_url('login') ?>" method="POST">
-                                <button type="submit" class="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
-                                    Connectez-vous pour vous inscrire
-                                </button>
-                            </form>
+                            <?php if (!is_authenticated()): ?>
+                                <form action="<?= base_url('login') ?>" method="POST">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                                        Connectez-vous pour vous inscrire
+                                    </button>
+                                </form>
+                            <?php endif; ?>
 
                         <?php endif; ?>
                     <?php else: ?>

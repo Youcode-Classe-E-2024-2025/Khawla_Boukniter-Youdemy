@@ -179,10 +179,12 @@ class Course extends Model
                 c.*,
                 u.prenom as teacher_prenom,
                 u.nom as teacher_nom,
-                COUNT(DISTINCT e.user_id) as student_count
+                cat.name as category_name,
+                COUNT(DISTINCT i.user_id) as student_count
              FROM cours c
              JOIN users u ON c.enseignant_id = u.id
-             LEFT JOIN inscriptions e ON c.id = e.cours_id
+             JOIN categories cat ON c.categorie_id = cat.id
+             LEFT JOIN inscriptions i ON c.id = i.cours_id
              GROUP BY c.id, u.prenom, u.nom
              ORDER BY student_count DESC
              LIMIT :limit";
@@ -428,5 +430,35 @@ class Course extends Model
         $stmt->bindValue(':keyword3', $searchTerm, \PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetchColumn();
+    }
+
+    public function getAllCoursesWithDetails($limit = null, $offset = null)
+    {
+        $query = "SELECT 
+                c.*,
+                u.nom as teacher_nom,
+                u.prenom as teacher_prenom,
+                cat.name as category_name,
+                COUNT(DISTINCT i.user_id) as student_count
+              FROM cours c
+              JOIN users u ON c.enseignant_id = u.id
+              JOIN categories cat ON c.categorie_id = cat.id
+              LEFT JOIN inscriptions i ON c.id = i.cours_id
+              GROUP BY c.id
+              ORDER BY c.created_at DESC";
+
+        if ($limit !== null) {
+            $query .= " LIMIT :limit OFFSET :offset";
+        }
+
+        $stmt = $this->db->prepare($query);
+
+        if ($limit !== null) {
+            $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

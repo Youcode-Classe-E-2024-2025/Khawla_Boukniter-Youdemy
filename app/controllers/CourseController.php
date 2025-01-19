@@ -372,4 +372,37 @@ class CourseController extends Controller
             'total' => $total
         ]);
     }
+
+    public function adminCourses()
+    {
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $perPage = 10;
+        $offset = ($currentPage - 1) * $perPage;
+
+        $totalCourses = $this->courseModel->getTotalCourses();
+        $courses = $this->courseModel->getAllCoursesWithDetails($perPage, $offset);
+
+        $totalPages = ceil($totalCourses / $perPage);
+        $startCount = $offset + 1;
+        $endCount = min($offset + $perPage, $totalCourses);
+
+        $this->render('users/admin/courses', [
+            'courses' => $courses,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'totalCourses' => $totalCourses,
+            'startCount' => $startCount,
+            'endCount' => $endCount
+        ]);
+    }
+
+    public function adminDeleteCourse($id)
+    {
+        if ($this->courseModel->delete($id)) {
+            $_SESSION['success'] = "Cours supprimé avec succès";
+        } else {
+            $_SESSION['error'] = "Erreur lors de la suppression du cours";
+        }
+        $this->redirect('users/admin/courses');
+    }
 }

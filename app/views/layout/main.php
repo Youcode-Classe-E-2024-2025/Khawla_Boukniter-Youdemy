@@ -27,6 +27,8 @@
                 }
             });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
     </head>
 
 <body>
@@ -59,11 +61,20 @@
                                     Dashboard
                                 </a>
                             <?php elseif ($_SESSION['user_role'] === 3): ?>
-                                <a href="/admin/dashboard" class="text-gray-900 inline-flex items-center px-1 pt-1">
-                                    Administration
+                                <a href="<?= base_url('dashboard') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Dashboard
                                 </a>
-                                <a href="/admin/management" class="text-gray-900 inline-flex items-center px-1 pt-1">
-                                    management
+                                <a href="<?= base_url('users/admin/inscriptions') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Inscriptions
+                                </a>
+                                <a href="<?= base_url('users/admin/courses') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Cours
+                                </a>
+                                <a href="<?= base_url('users/admin/categories-tags') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Catégories & Tags
+                                </a>
+                                <a href="<?= base_url('users/admin/users') ?>" class="text-gray-900 inline-flex items-center px-1 pt-1">
+                                    Utilisateurs
                                 </a>
                             <?php endif; ?>
                         <?php endif; ?>
