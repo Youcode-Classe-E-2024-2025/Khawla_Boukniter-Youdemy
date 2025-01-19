@@ -36,6 +36,7 @@
     </section>
     <section class="form-wrapper grid center">
       <form action="<?= base_url('register') ?>" method="POST" class="form-section">
+        <?= csrf_field() ?>
         <div class="header">
           <h1>Inscription</h1>
           <p>Bienvenue</p>
@@ -47,19 +48,19 @@
         <div id="step1">
           <div class="field">
             <label for="nom">Nom</label>
-            <input type="text" placeholder="Entrez votre nom" name="nom" required>
+            <input type="text" placeholder="Entrez votre nom" name="nom" required pattern="[A-Za-z\s]+" minlength="2" maxlength="50">
           </div>
           <div class="field">
             <label for="prenom">Prénom</label>
-            <input type="text" placeholder="Entrez votre prénom" name="prenom" required>
+            <input type="text" placeholder="Entrez votre prénom" name="prenom" required pattern="[A-Za-z\s]+" minlength="2" maxlength="50">
           </div>
           <div class="field">
             <label for="email">Email</label>
-            <input type="email" placeholder="Entrez votre email" name="email" required>
+            <input type="email" placeholder="Entrez votre email" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
           </div>
           <div class="field">
             <label for="password">Mot de passe</label>
-            <input type="password" placeholder="Entrez votre mot de passe" name="password" required>
+            <input type="password" placeholder="Entrez votre mot de passe" name="password" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$">
           </div>
           <button type="button" class="btn btn-primary" id="nextStep">Suivant</button>
         </div>
@@ -94,5 +95,16 @@
       document.getElementById('step2').style.display = 'none';
       document.getElementById('step1').style.display = 'block';
     });
+
+    function validateForm() {
+      const password = document.querySelector('input[name="password"]').value;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+      if (!passwordRegex.test(password)) {
+        alert('Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial');
+        return false;
+      }
+      return true;
+    }
   </script>
 </body>

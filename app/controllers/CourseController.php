@@ -138,16 +138,20 @@ class CourseController extends Controller
     public function store()
     {
         Auth::checkRole([2]);
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['course_data'])) {
-            error_log("Content type received: " . $_SESSION['course_data']['content_type']);
+        if ($this->isPost() && isset($_SESSION['course_data'])) {
 
+            if (!verify_csrf_token($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token de sécurité invalide";
+                $this->redirect('teacher/courses/create');
+                return;
+            }
 
             $courseData = [
-                'titre' => $_SESSION['course_data']['titre'],
-                'description' => $_SESSION['course_data']['description'],
-                'categorie_id' => $_SESSION['course_data']['categorie_id'],
-                'enseignant_id' => $_SESSION['user_id'],
-                'content_type' => $_SESSION['course_data']['content_type']
+                'titre' => sanitizeInput($_SESSION['course_data']['titre']),
+                'description' => sanitizeInput($_SESSION['course_data']['description']),
+                'categorie_id' => (int)$_SESSION['course_data']['categorie_id'],
+                'enseignant_id' => (int)$_SESSION['user_id'],
+                'content_type' => sanitizeInput($_SESSION['course_data']['content_type'])
             ];
 
             $courseId = $this->courseModel->create($courseData);

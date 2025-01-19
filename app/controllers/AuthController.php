@@ -27,6 +27,12 @@ class AuthController extends Controller
     public function login()
     {
         if ($this->isPost()) {
+            if (!verify_csrf_token($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token de sécurité invalide";
+                $this->redirect('login');
+                return;
+            }
+
             $data = $this->getPostData();
 
             if (empty($data['email']) || empty($data['password'])) {
@@ -64,7 +70,12 @@ class AuthController extends Controller
 
     public function register()
     {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if ($this->isPost()) {
+            if (!verify_csrf_token($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token de sécurité invalide";
+                $this->redirect('register');
+                return;
+            }
             try {
                 error_log("Password before hash: " . $_POST['password']);
                 $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);

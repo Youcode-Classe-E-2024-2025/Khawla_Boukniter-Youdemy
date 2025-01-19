@@ -1,17 +1,3 @@
-<!-- <form action="<?= base_url('login') ?>" method="POST">
-    <h2>Connexion</h2>
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    
-    <label for="password">Mot de passe:</label>
-    <input type="password" id="password" name="password" required>
-    
-    <button type="submit">Se connecter</button>
-    
-    <p>Pas encore inscrit ? <a href="<?= base_url('register') ?>">Inscrivez-vous ici</a></p>
-</form> -->
-
-
 <link href="<?= asset_url('css/style.css') ?>" rel="stylesheet">
 
 <body class="flex center">
@@ -21,27 +7,42 @@
     </section>
     <section class="form-wrapper grid center">
       <form action="<?= base_url('login') ?>" method="POST" class="form-section">
+        <?= csrf_field() ?>
         <div class="header">
           <h1>Welcome Back</h1>
           <p>Welcome back, Please enter your details</p>
           <?php if (isset($_SESSION['error'])): ?>
-              <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
+            <div class="error"><?php echo $_SESSION['error'];
+                                unset($_SESSION['error']); ?></div>
           <?php endif; ?>
         </div>
         <div class="field">
           <label for="email">Email</label>
-          <input type="text" placeholder="Enter Your name" name="email">
+          <input type="text" placeholder="Enter Your name" name="email" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
         </div>
         <div class="field">
           <label for="password">Password</label>
-          <input type="password" placeholder="Enter Your password" name="password">
+          <input type="password" placeholder="Enter Your password" name="password" required>
         </div>
         <button type="submit" class="btn btn-primary">Sign in</button>
-        
+
         <div class="footer">
           <p>Dont have an account? <a href="<?= base_url('register') ?>">Sign up</a></p>
         </div>
       </form>
     </section>
   </div>
+
+  <script>
+    function validateLoginForm() {
+      const email = document.querySelector('input[name="email"]').value;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!emailRegex.test(email)) {
+        alert('Veuillez entrer une adresse email valide');
+        return false;
+      }
+      return true;
+    }
+  </script>
 </body>

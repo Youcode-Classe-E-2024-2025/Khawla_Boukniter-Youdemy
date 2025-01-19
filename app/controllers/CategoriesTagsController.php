@@ -37,7 +37,12 @@ class CategoriesTagsController extends Controller
     public function addCategory()
     {
         if ($this->isPost()) {
-            $name = $_POST['name'];
+            if (!verify_csrf_token($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token de sécurité invalide";
+                $this->redirect('teacher/courses/create');
+                return;
+            }
+            $name = sanitizeInput($_POST['name']);
             if ($this->categoryModel->create(['name' => $name])) {
                 $_SESSION['success'] = "Catégorie ajoutée avec succès";
             } else {
@@ -63,12 +68,18 @@ class CategoriesTagsController extends Controller
     public function addTags()
     {
         if ($this->isPost()) {
-            $tagsInput = $_POST['tags'];
+            if (!verify_csrf_token($_POST['csrf_token'])) {
+                $_SESSION['error'] = "Token de sécurité invalide";
+                $this->redirect('teacher/courses/create');
+                return;
+            }
+            $tagsInput = sanitizeInput($_POST['tags']);
             $tagsArray = json_decode($tagsInput, true);
 
             if (is_array($tagsArray)) {
                 foreach ($tagsArray as $tag) {
                     if (!empty($tag['value'])) {
+                        $tag['value'] = sanitizeInput($tag['value']);
                         $this->tagModel->create(['name' => $tag['value']]);
                     }
                 }

@@ -46,7 +46,7 @@
                                     <input type="text"
                                         name="titre"
                                         id="title"
-                                        required
+                                        required minlength="5" maxlength="100"
                                         class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
                                 </div>
                                 <p class="mt-2 text-sm text-gray-500">
@@ -62,7 +62,7 @@
                                     <textarea id="description"
                                         name="description"
                                         rows="4"
-                                        required
+                                        required minlength="20" maxlength="500"
                                         class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
                                 </div>
                                 <p class="mt-2 text-sm text-gray-500">
@@ -289,6 +289,35 @@
             Array.from(hiddenSelect.options).forEach(option => {
                 option.selected = selectedTags.has(option.value);
             });
+        }
+
+        function validateCourseForm() {
+            const title = document.querySelector('input[name="titre"]').value;
+            const description = document.querySelector('textarea[name="description"]').value;
+            const category = document.querySelector('select[name="categorie_id"]').value;
+            const contentType = document.querySelector('select[name="content_type"]').value;
+
+            if (title.length < 5) {
+                alert('Le titre doit contenir au moins 5 caractères');
+                return false;
+            }
+
+            if (description.length < 20) {
+                alert('La description doit contenir au moins 20 caractères');
+                return false;
+            }
+
+            if (!category) {
+                alert('Veuillez sélectionner une catégorie');
+                return false;
+            }
+
+            if (!contentType) {
+                alert('Veuillez sélectionner un type de contenu');
+                return false;
+            }
+
+            return true;
         }
     });
 </script>

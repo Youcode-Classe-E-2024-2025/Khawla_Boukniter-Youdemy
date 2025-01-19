@@ -78,8 +78,9 @@
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white rounded-lg p-8 max-w-md w-full">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Ajouter une catégorie</h3>
-                <form action="<?= base_url('admin/categories/add') ?>" method="POST">
-                    <input type="text" name="name" required
+                <form action="<?= base_url('admin/categories/add') ?>" method="POST" onsubmit="return validateCategoryForm()">
+                    <?= csrf_field() ?>
+                    <input type="text" name="name" required minlength="3" maxlength="50" pattern="[A-Za-z0-9\s-]+"
                         class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Nom de la catégorie">
                     <div class="mt-4 flex justify-end">
@@ -99,8 +100,9 @@
         <div class="flex items-center justify-center min-h-screen">
             <div class="bg-white rounded-lg p-8 max-w-md w-full">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Ajouter des tags</h3>
-                <form action="<?= base_url('admin/tags/add') ?>" method="POST">
-                    <input name="tags" id="tagsInput" class="w-full border-gray-300 rounded-md shadow-sm">
+                <form action="<?= base_url('admin/tags/add') ?>" method="POST" onsubmit="return validateTagForm()">
+                    <?= csrf_field() ?>
+                    <input name="tags" id="tagsInput" class="w-full border-gray-300 rounded-md shadow-sm" required>
                     <div class="mt-4 flex justify-end">
                         <button type="button" onclick="document.getElementById('addTagsModal').classList.add('hidden')"
                             class="mr-4 text-gray-600 hover:text-gray-900">Annuler</button>
@@ -121,4 +123,22 @@
         maxTags: 10,
         placeholder: "Entrez vos tags"
     });
+
+    function validateCategoryForm() {
+        const name = document.querySelector('input[name="name"]').value;
+        if (name.length < 3) {
+            alert('Le nom de la catégorie doit contenir au moins 3 caractères');
+            return false;
+        }
+        return true;
+    }
+
+    function validateTagForm() {
+        const tags = document.querySelector('input[name="tags"]').value;
+        if (!tags) {
+            alert('Veuillez ajouter au moins un tag');
+            return false;
+        }
+        return true;
+    }
 </script>
