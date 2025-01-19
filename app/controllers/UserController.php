@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Middleware\Auth;
 use App\Models\User;
 
 class UserController extends Controller
@@ -14,12 +15,11 @@ class UserController extends Controller
         $this->userModel = new User();
     }
 
-
-    public function index()
-    {
-        $users = $this->userModel->findAll();
-        $this->render("users/index", ["users" => $users]);
-    }
+    // public function index()
+    // {
+    //     $users = $this->userModel->findAll();
+    //     $this->render("users/index", ["users" => $users]);
+    // }
 
     public function store()
     {
@@ -63,12 +63,14 @@ class UserController extends Controller
 
     public function inscriptions()
     {
+        Auth::checkRole([3]);
         $pendingTeachers = $this->userModel->getPendingTeachersDetails();
         $this->render('users/admin/inscriptions', ['pendingTeachers' => $pendingTeachers]);
     }
 
     public function validateTeacher()
     {
+        Auth::checkRole([3]);
         if ($this->isPost()) {
             $userId = $_POST['user_id'];
             if ($this->userModel->validateTeacher($userId)) {
@@ -82,6 +84,7 @@ class UserController extends Controller
 
     public function rejectTeacher()
     {
+        Auth::checkRole([3]);
         if ($this->isPost()) {
             $userId = $_POST['user_id'];
             if ($this->userModel->rejectTeacher($userId)) {
@@ -92,7 +95,6 @@ class UserController extends Controller
             $this->redirect('users/admin/inscriptions');
         }
     }
-
 
     public function users()
     {

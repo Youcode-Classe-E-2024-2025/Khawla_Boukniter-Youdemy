@@ -132,66 +132,6 @@ class AuthController extends Controller
         }
     }
 
-    public function chooseRoleForm()
-    {
-        if (!isset($_SESSION['user_id'])) {
-            $this->redirect('login');
-            return;
-        }
-        $this->render('auth/choose_role', ['pageTitle' => 'Choisir un Rôle']);
-    }
-
-    public function chooseRole()
-    {
-        if (!$this->isAuthenticated()) {
-            $this->redirect('login');
-            return;
-        }
-
-        if ($this->isPost()) {
-            $data = $this->getPostData();
-            $role = $data['role'] ?? null;
-
-            if ($role && in_array($role, ['manager', 'member'])) {
-                $this->userModel->setRole($_SESSION['user_id'], $role);
-                $_SESSION['user_role'] = $role;
-                $_SESSION['success'] = "Rôle défini avec succès.";
-                $this->redirect('dashboard');
-            } else {
-                $_SESSION['error'] = "Rôle invalide.";
-                $this->redirect('choose_role');
-            }
-        }
-
-        $this->render('auth/choose_role', ['pageTitle' => 'Choisir un Rôle']);
-    }
-
-    public function manageRoles()
-    {
-        if (!$this->isAuthenticated() || $_SESSION['user_role'] !== 3) {
-            $_SESSION['error'] = "Vous n'avez pas les permissions nécessaires.";
-            $this->redirect('dashboard');
-            return;
-        }
-
-        if ($this->isPost()) {
-            $data = $this->getPostData();
-            $userId = $data['user_id'];
-            $role = $data['role'];
-
-            if ($this->userModel->updateRole($userId, $role)) {
-                $_SESSION['success'] = "Rôle mis à jour avec succès.";
-            } else {
-                $_SESSION['error'] = "Erreur lors de la mise à jour du rôle.";
-            }
-
-            $this->redirect('manage_roles');
-        }
-
-        // Afficher la vue de gestion des rôles
-        $this->render('auth/manage_roles', ['pageTitle' => 'Gérer les Rôles']);
-    }
-
     public function logout()
     {
         session_destroy();

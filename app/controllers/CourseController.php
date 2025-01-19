@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\CourseContent\VideoContent;
 use App\Core\CourseContent\DocumentContent;
 use App\Core\CourseContent\CourseContentInterface;
+use App\Core\Middleware\Auth;
 
 use App\Core\Controller;
 use App\Models\Course;
@@ -24,23 +25,6 @@ class CourseController extends Controller
         $this->courseModel = new Course();
         $this->attachmentModel = new Attachment();
         $this->userModel = new User();
-    }
-
-    public function index()
-    {
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $limit = 12;
-        $filters = [];
-
-        $courses = $this->courseModel->getPublishedCourses($filters, $page, $limit);
-
-        $total = $this->courseModel->getTotalCourses();
-
-        $pages = ceil($total / $limit);
-
-        $categories = $this->courseModel->getCategories();
-
-        $this->render('index', ['courses' => $courses, 'categories' => $categories, 'pages' => $pages, 'page' => $page]);
     }
 
     public function browse()
@@ -82,6 +66,7 @@ class CourseController extends Controller
 
     public function create()
     {
+        Auth::checkRole([2]);
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 2) {
             $_SESSION['error'] = "Vous devez être un enseignant pour créer un cours.";
             $this->redirect('login');
@@ -152,6 +137,7 @@ class CourseController extends Controller
 
     public function store()
     {
+        Auth::checkRole([2]);
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['course_data'])) {
             error_log("Content type received: " . $_SESSION['course_data']['content_type']);
 
@@ -200,10 +186,9 @@ class CourseController extends Controller
 
     public function edit($id)
     {
-        error_log("Editing course with ID: " . $id);
+        Auth::checkRole([2]);
 
         $course = $this->courseModel->getWithDetails($id);
-        error_log("Course data: " . print_r($course, true));
 
         if (!$course) {
             error_log("Course not found in database");
@@ -266,6 +251,7 @@ class CourseController extends Controller
 
     public function enroll($courseId)
     {
+        Auth::checkRole([1]);
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 1) {
             $_SESSION['error'] = "Vous devez être un étudiant pour vous inscrire à ce cours.";
             $this->redirect('login');
@@ -278,6 +264,7 @@ class CourseController extends Controller
 
     public function teacherCourses()
     {
+        Auth::checkRole([2]);
         $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $perPage = 12;
         $offset = ($currentPage - 1) * $perPage;
@@ -300,6 +287,7 @@ class CourseController extends Controller
 
     public function dashboard()
     {
+        Auth::checkRole([1, 2, 3]);
         $latestCourses = $this->courseModel->getLatestTeacherCourses($_SESSION['user_id'], 3);
         $stats = [
             'total_courses' => $this->courseModel->getTotalCoursesByTeacher($_SESSION['user_id']),
@@ -314,6 +302,7 @@ class CourseController extends Controller
 
     public function studentCourses()
     {
+        Auth::checkRole([1]);
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 1) {
             $this->redirect('login');
         }

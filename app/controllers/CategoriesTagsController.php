@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Middleware\Auth;
 use App\Models\Category;
 use App\Models\Tag;
 
@@ -13,6 +14,7 @@ class CategoriesTagsController extends Controller
 
     public function __construct()
     {
+        Auth::checkRole([3]);
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 3) {
             $_SESSION['error'] = "Accès non autorisé";
             $this->redirect('login');
