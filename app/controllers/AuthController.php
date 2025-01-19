@@ -35,11 +35,10 @@ class AuthController extends Controller
                 return;
             }
 
-            error_log("Tentative de connexion avec l'email: " . $data['email']);
-
             $user = $this->userModel->findByEmail($data['email']);
-
-            error_log("Résultat de findByEmail: " . print_r($user, true));
+            error_log("Login attempt - Raw password: " . $data['password']);
+            error_log("Login attempt - Stored hash: " . ($user ? $user['password'] : 'No user found'));
+            error_log("Password verify result: " . (password_verify($data['password'], $user['password']) ? 'true' : 'false'));
 
             if ($user && password_verify($data['password'], $user['password'])) {
                 $_SESSION['user_id'] = $user['id'];
@@ -47,24 +46,10 @@ class AuthController extends Controller
                 $_SESSION['user_email'] = $user['email'];
                 $_SESSION['user_name'] = $user['nom'] . ' ' . $user['prenom'];
 
-                error_log("Connexion réussie pour l'utilisateur ID: " . $user['id'] . " et rôle: " . $user['role_id'] . " et email: " . $user['email'] . " et nom: " . $user['nom'] . " et prénom: " . $user['prenom']);
+                $this->redirect('dashboard');
 
-                if ($user['role_id'] === 3) {
-                    error_log("Redirection vers: admin/dashboard");
-                    $this->redirect('dashboard');
-                } else if ($user['role_id'] === 2) {
-                    error_log("Redirection vers: teacher/dashboard");
-                    $this->redirect('dashboard');
-                } else if ($user['role_id'] === 1) {
-                    error_log("Redirection vers: student/dashboard");
-                    $this->redirect('dashboard');
-                } else {
-                    error_log("Redirection vers: choose_role");
-                    $this->redirect('choose_role');
-                }
                 return true;
             } else {
-                error_log("Échec de la connexion : email ou mot de passe incorrect pour l'email: " . $data['email']);
                 $_SESSION['error'] = "Email ou mot de passe incorrect";
                 $this->redirect('login');
                 return false;
@@ -81,90 +66,68 @@ class AuthController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             try {
-                $nom = sanitizeInput($_POST['nom'] ?? '');
-                $prenom = sanitizeInput($_POST['prenom'] ?? '');
-                $email = filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL);
-                $password = $_POST['password'] ?? '';
-                $role = $_POST['role_id'] ?? null;
+                error_log("Password before hash: " . $_POST['password']);
+                $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
+                error_log("Password after hash: " . $hashedPassword);
 
-                $_SESSION['signup_form'] = [
-                    'nom' => $nom,
-                    'prenom' => $prenom,
-                    'email' => $email
+                $data = [
+                    'nom' => sanitizeInput($_POST['nom'] ?? ''),
+                    'prenom' => sanitizeInput($_POST['prenom'] ?? ''),
+                    'email' => filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL),
+                    'password' => $hashedPassword,
+                    'role_id' => $_POST['role_id'] ?? null,
+                    'is_validated' => ($_POST['role_id'] == 2) ? 0 : 1
                 ];
+                error_log("Registration data prepared: " . print_r($data, true));
 
-                if (empty($nom) || empty($prenom) || empty($email) || empty($password)) {
+                // $_SESSION['signup_form'] = [
+                //     'nom' => $nom,
+                //     'prenom' => $prenom,
+                //     'email' => $email
+                // ];
+
+                if (empty($_POST['nom']) || empty($_POST['prenom']) || empty($_POST['email']) || empty($_POST['password'])) {
                     throw new InvalidArgumentException('Tous les champs sont obligatoires.');
                 }
 
-                if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
                     throw new InvalidArgumentException('Adresse email invalide.');
                 }
 
-                if ($this->userModel->findByEmail($email)) {
+                if ($this->userModel->findByEmail($_POST['email'])) {
                     throw new InvalidArgumentException('L\'email est déjà utilisé.');
                 }
 
-                if (strlen($password) < 8) {
+                if (strlen($_POST['password']) < 8) {
                     throw new InvalidArgumentException('Le mot de passe doit contenir au moins 8 caractères.');
                 }
 
-                if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
-                    throw new InvalidArgumentException('Le mot de passe doit contenir au moins : 
-                        - Une lettre minuscule
-                        - Une lettre majuscule
-                        - Un chiffre
-                        - Un caractère spécial');
+                // if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $password)) {
+                //     throw new InvalidArgumentException('Le mot de passe doit contenir au moins : 
+                //         - Une lettre minuscule
+                //         - Une lettre majuscule
+                //         - Un chiffre
+                //         - Un caractère spécial');
+                // }
+
+
+                $result = $this->userModel->create($data);
+
+                if ($result) {
+                    error_log("User created successfully");
+                    $_SESSION['success'] = ($data['role_id'] == 2)
+                        ? "Compte créé avec succès. En attente de validation par l'administrateur."
+                        : "Compte créé avec succès.";
+                    error_log("Redirecting to login");
+                    $this->redirect('login');
+                    return;
                 }
-
-                $role = filter_var($_POST['role_id'] ?? Role::STUDENT, FILTER_VALIDATE_INT, [
-                    'options' => [
-                        'max_range' => Role::ADMIN
-                    ],
-                    'default' => Role::STUDENT
-                ]);
-
-                error_log("Rôle : $role");
-
-                $user = new User();
-                $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-                $saveResult = $user->create([
-                    'nom' => $nom,
-                    'prenom' => $prenom,
-                    'email' => $email,
-                    'password' => $hashed_password,
-                    'role_id' => $role
-                ]);
-
-                error_log("Résultat de sauvegarde : " . ($saveResult ? 'Succès' : 'Échec'));
-
-                if (!$saveResult) {
-                    throw new Exception('Impossible de créer l\'utilisateur. L\'email existe peut être déjà.');
-                }
-
-                $loginResult = $this->login();
-
-                error_log("Résultat de connexion : " . ($loginResult ? 'Succès' : 'Échec'));
-
-                if ($loginResult) {
-                    unset($_SESSION['signup_form']);
-                    unset($_SESSION['signup_error']);
-
-                    redirect('views/');
-                    if ($user->role_id == Role::TEACHER) {
-                        redirect('teacher/dashboard');
-                    } else if ($user->role_id == Role::ADMIN) {
-                        redirect('admin/dashboard');
-                    } else {
-                        redirect('student/dashboard');
-                    }
-                } else {
-                    throw new Exception('Échec de la connexion après inscription.');
-                }
+                error_log("Failed to create user");
+                throw new Exception('Erreur lors de la création du compte.');
             } catch (Exception $e) {
-                $_SESSION['signup_error'] = $e->getMessage();
-                redirect('auth/register');
-                exit;
+                error_log("Registration error: " . $e->getMessage());
+                $_SESSION['error'] = $e->getMessage();
+                redirect('register');
             }
         }
     }

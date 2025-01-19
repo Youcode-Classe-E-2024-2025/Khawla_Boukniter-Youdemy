@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Config;
 
 use PDO;
@@ -6,7 +7,8 @@ use PDOException;
 use InvalidArgumentException;
 use Exception;
 
-class Database {
+class Database
+{
     private const HOST = 'localhost';
     private const USERNAME = 'root';
     private const PASSWORD = '';
@@ -16,7 +18,8 @@ class Database {
 
     private function __construct() {}
 
-    public static function getConnection(): PDO {
+    public static function getConnection(): PDO
+    {
         if (self::$instance === null) {
             try {
                 $dsn = "mysql:host=" . self::HOST . ";dbname=" . self::DBNAME . ";charset=utf8mb4";
@@ -38,13 +41,13 @@ class Database {
         return self::$instance;
     }
 
-    private function __clone() {}
-
-    public static function closeConnection() {
+    public static function closeConnection()
+    {
         self::$instance = null;
     }
 
-    public static function checkUserPermission(int $userId, string $role): bool {
+    public static function checkUserPermission(int $userId, string $role): bool
+    {
         try {
             if ($userId <= 0 || empty($role)) {
                 throw new InvalidArgumentException("ID utilisateur ou role invalide.");
@@ -65,7 +68,8 @@ class Database {
         }
     }
 
-    public static function getUserRole(int $userId): ?int {
+    public static function getUserRole(int $userId): ?int
+    {
         try {
             if ($userId <= 0) {
                 throw new InvalidArgumentException("ID utilisateur invalide.");

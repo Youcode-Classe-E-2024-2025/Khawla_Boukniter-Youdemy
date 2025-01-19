@@ -7,26 +7,32 @@ use PDO;
 use PDOException;
 use Exception;
 
-class User {
+class User
+{
     private PDO $db;
 
     public int $role_id;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = Database::getConnection();
     }
 
-    public function create(array $data): int {
-        $sql = "INSERT INTO users (nom, prenom, email, password, role_id) VALUES (:nom, :prenom, :email, :password, :role_id)";
+    public function create(array $data): int
+    {
+        $sql = "INSERT INTO users (nom, prenom, email, password, role_id, is_validated) VALUES (:nom, :prenom, :email, :password, :role_id, :is_validated)";
         $stmt = $this->db->prepare($sql);
-        
+
+        $is_validated = ($data['role_id'] == 2) ? 0 : 1;
+
         try {
             $stmt->execute([
                 'nom' => $data['nom'],
                 'prenom' => $data['prenom'],
                 'email' => $data['email'],
-                'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-                'role_id' => $data['role_id']
+                'password' => $data['password'],
+                'role_id' => $data['role_id'],
+                'is_validated' => $is_validated
             ]);
         } catch (PDOException $e) {
             error_log("Erreur lors de l'insertion de l'utilisateur : " . $e->getMessage());
@@ -36,17 +42,19 @@ class User {
         return $this->db->lastInsertId();
     }
 
-    public function setRole(int $userId, string $role): bool {
+    public function setRole(int $userId, string $role): bool
+    {
         $sql = "UPDATE users SET role = :role WHERE id = :id";
         $stmt = $this->db->prepare($sql);
-        
+
         return $stmt->execute([
             'role' => $role,
             'id' => $userId
         ]);
     }
 
-    public function updateRole($userId, $role) {
+    public function updateRole($userId, $role)
+    {
         $query = "UPDATE users SET role = :role WHERE id = :userId";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':role', $role);
@@ -54,21 +62,23 @@ class User {
         return $stmt->execute();
     }
 
-    public function findByEmail(string $email): ?array {
+    public function findByEmail(string $email): ?array
+    {
         $sql = "SELECT * FROM users WHERE email = :email";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['email' => $email]);
-        
+
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         return $user ?: null;
     }
 
-    public function findById(int $id): ?array {
+    public function findById(int $id): ?array
+    {
         error_log("Searching for user with ID: " . $id);
         $sql = "SELECT * FROM users WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
-        
+
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($user) {
             error_log("User found: " . print_r($user, true));
@@ -78,20 +88,23 @@ class User {
         return $user ?: null;
     }
 
-    public function findAll(): array {
+    public function findAll(): array
+    {
         $sql = "SELECT * FROM users";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function verifyPassword(string $password, string $hash): bool {
+    public function verifyPassword(string $password, string $hash): bool
+    {
         return password_verify($password, $hash);
     }
 
-    public function update(int $id, array $data): bool {
+    public function update(int $id, array $data): bool
+    {
         $sql = "UPDATE users SET nom = :nom, prenom = :prenom, email = :email WHERE id = :id";
         $stmt = $this->db->prepare($sql);
-        
+
         return $stmt->execute([
             'nom' => $data['nom'],
             'prenom' => $data['prenom'],
@@ -100,13 +113,10 @@ class User {
         ]);
     }
 
-    public function delete(int $id): bool {
+    public function delete(int $id): bool
+    {
         $sql = "DELETE FROM users WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['id' => $id]);
     }
-
-    
-
-
 }

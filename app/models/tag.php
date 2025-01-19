@@ -2,24 +2,21 @@
 
 namespace App\Models;
 
-use App\Config\Database;
-use PDO;
+use App\Core\Model;
 
-class Tag {
-    private PDO $db;
+class Tag extends Model
+{
 
-    public function __construct() {
-        $this->db = Database::getInstance()->getConnection();
-    }
-
-    public function create(array $data): int {
+    public function create(array $data)
+    {
         $sql = "INSERT INTO tags (name) VALUES (:name)";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['name' => $data['name']]);
         return $this->db->lastInsertId();
     }
 
-    public function findByName(string $name): ?array {
+    public function findByName(string $name): ?array
+    {
         $sql = "SELECT * FROM tags WHERE name = :name";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['name' => $name]);

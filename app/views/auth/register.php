@@ -23,7 +23,8 @@
 </form>
 
 <?php if (isset($_SESSION['signup_error'])): ?>
-    <div class="error"><?php echo $_SESSION['signup_error']; unset($_SESSION['signup_error']); ?></div>
+    <div class="error"><?php echo $_SESSION['signup_error'];
+                        unset($_SESSION['signup_error']); ?></div>
 <?php endif; ?> -->
 
 <link href="<?= asset_url('css/style.css') ?>" rel="stylesheet">
@@ -39,7 +40,8 @@
           <h1>Inscription</h1>
           <p>Bienvenue</p>
           <?php if (isset($_SESSION['error'])): ?>
-              <div class="error"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
+            <div class="error"><?php echo $_SESSION['error'];
+                                unset($_SESSION['error']); ?></div>
           <?php endif; ?>
         </div>
         <div id="step1">
@@ -68,15 +70,14 @@
             <select name="role_id" id="role_id" required>
               <option value="1">Étudiant</option>
               <option value="2">Professeur</option>
-              <option value="3">Administrateur</option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary">S'inscrire</button>
           <button type="button" class="btn btn-secondary" id="backStep">Retour</button>
         </div>
-        
+
         <!-- <button type="submit" class="btn btn-primary">Sign in</button> -->
-        
+
         <div class="footer">
           <p>Already have an account? <a href="<?= base_url('login') ?>">Sign up</a></p>
         </div>
