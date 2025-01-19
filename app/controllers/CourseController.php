@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\Course;
 use App\Models\Attachment;
+use App\Models\User;
 
 class CourseController extends Controller
 {
@@ -12,10 +13,13 @@ class CourseController extends Controller
     private $attachmentModel;
     private $courseModel;
 
+    private $userModel;
+
     public function __construct()
     {
         $this->courseModel = new Course();
         $this->attachmentModel = new Attachment();
+        $this->userModel = new User();
     }
 
     public function index()
@@ -77,6 +81,13 @@ class CourseController extends Controller
         if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 2) {
             $_SESSION['error'] = "Vous devez être un enseignant pour créer un cours.";
             $this->redirect('login');
+        }
+
+        $user = $this->userModel->findById($_SESSION['user_id']);
+        if (!$user['is_validated']) {
+            $_SESSION['error'] = "Votre compte est en attente de validation par l'administrateur. Vous ne pouvez pas créer de cours pour le moment.";
+            $this->redirect('dashboard');
+            return;
         }
 
         $categories = $this->courseModel->getCategories();
