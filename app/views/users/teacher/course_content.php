@@ -21,6 +21,7 @@
 
         <div class="bg-white shadow rounded-lg">
             <form action="<?= base_url('teacher/courses/store') ?>" method="POST" enctype="multipart/form-data" class="space-y-8 p-8">
+                <?= csrf_field() ?>
                 <?php if ($_SESSION['course_data']['content_type'] === 'video'): ?>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">

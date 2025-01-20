@@ -10,11 +10,11 @@
                             Par <?= htmlspecialchars($course['teacher_prenom'] . ' ' . $course['teacher_nom']) ?>
                         </p>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                    <div class="items-center space-x-4">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 text-nowrap mb-4">
                             <?= htmlspecialchars($course['category_name'] ?? '') ?>
                         </span>
-                        <span class="text-sm text-gray-500"><?= $course['student_count'] ?> étudiants inscrits</span>
+                        <span class="text-sm text-gray-500 text-nowrap mt-3"><?= $course['student_count'] ?> étudiants inscrits</span>
                     </div>
                 </div>
             </div>
@@ -53,7 +53,7 @@
                     <?php if ($course['content_type'] === 'video'): ?>
                         <div class="aspect-w-16 aspect-h-9">
                             <video
-                                src="<?= htmlspecialchars($course['content_url']) ?>"
+                                src="<?= base_url($course['content_url']) ?>"
                                 class="w-full h-96 rounded-lg shadow-lg"
                                 allowfullscreen>
                             </video>
